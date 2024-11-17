@@ -2,33 +2,36 @@
 pragma solidity ^0.8.9;
 
 interface IInsuranceServiceManager {
-    event NewTaskCreated(uint32 indexed taskIndex, Task task);
+    event NewClaimCreated(uint32 indexed claimIndex, Claim claim);
 
-    event TaskResponded(uint32 indexed taskIndex, Task task, address operator);
+    event ClaimResponded(uint32 indexed claimIndex, Claim claim, address operator);
 
-    struct Task {
-        string name;
-        uint32 taskCreatedBlock;
+    struct Claim {
+        address pool;
+        address insured;
+        bool isApproved;
+        uint32 claimCreatedBlock;
     }
 
-    function latestTaskNum() external view returns (uint32);
+    function latestClaimNum() external view returns (uint32);
 
-    function allTaskHashes(
-        uint32 taskIndex
+    function allClaimHashes(
+        uint32 claimIndex
     ) external view returns (bytes32);
 
-    function allTaskResponses(
+    function allClaimResponses(
         address operator,
-        uint32 taskIndex
+        uint32 claimIndex
     ) external view returns (bytes memory);
 
-    function createNewTask(
-        string memory name
-    ) external returns (Task memory);
+    function createNewClaim(
+        address pool,
+        address insured
+    ) external returns (Claim memory);
 
-    function respondToTask(
-        Task calldata task,
-        uint32 referenceTaskIndex,
+    function respondToClaim(
+        Claim calldata claim,
+        uint32 referenceClaimIndex,
         bytes calldata signature
     ) external;
 }

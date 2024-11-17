@@ -13,23 +13,28 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+import {IInsurancePool} from "./IInsurancePool.sol";
+
 /**
  * @title Primary entrypoint for procuring services from Insurance.
  * @author Eigen Labs, Inc.
  */
 contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceManager {
     using ECDSAUpgradeable for bytes32;
+    using Strings for uint256;
 
-    uint32 public latestTaskNum;
+    uint32 public latestClaimNum;
 
-    // mapping of task indices to all tasks hashes
-    // when a task is created, task hash is stored here,
-    // and responses need to pass the actual task,
+    // mapping of claim indices to all claims hashes
+    // when a claim is created, claim hash is stored here,
+    // and responses need to pass the actual claim,
     // which is hashed onchain and checked against this mapping
-    mapping(uint32 => bytes32) public allTaskHashes;
+    mapping(uint32 => bytes32) public allClaimHashes;
 
-    // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
-    mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
+    // mapping of claim indices to hash of abi.encode(claimResponse, claimResponseMetadata)
+    mapping(address => mapping(uint32 => bytes)) public allClaimResponses;
 
     modifier onlyOperator() {
         require(
@@ -55,50 +60,75 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
     {}
 
     /* FUNCTIONS */
-    // NOTE: this function creates new task, assigns it a taskId
-    function createNewTask(
-        string memory name
-    ) external returns (Task memory) {
-        // create a new task struct
-        Task memory newTask;
-        newTask.name = name;
-        newTask.taskCreatedBlock = uint32(block.number);
+    // NOTE: this function creates new claim, assigns it a claimId
+    function createNewClaim(
+        address pool, 
+        address insured
+    ) external returns (Claim memory) {
+        // TOOD :: create validation to allow only if the sender is the registered pool
 
-        // store hash of task onchain, emit event, and increase taskNum
-        allTaskHashes[latestTaskNum] = keccak256(abi.encode(newTask));
-        emit NewTaskCreated(latestTaskNum, newTask);
-        latestTaskNum = latestTaskNum + 1;
+        // create a new claim struct
+        Claim memory newClaim;
+        newClaim.pool = pool;
+        newClaim.insured = insured;
+        newClaim.claimCreatedBlock = uint32(block.number);
 
-        return newTask;
+        // store hash of claim onchain, emit event, and increase claimNum
+        allClaimHashes[latestClaimNum] = keccak256(abi.encode(newClaim));
+        emit NewClaimCreated(latestClaimNum, newClaim);
+        latestClaimNum = latestClaimNum + 1;
+
+        return newClaim;
     }
 
-    function respondToTask(
-        Task calldata task,
-        uint32 referenceTaskIndex,
+    function respondToClaim(
+        Claim calldata claim,
+        uint32 referenceClaimIndex,
         bytes memory signature
     ) external {
-        // check that the task is valid, hasn't been responsed yet, and is being responded in time
+        // check that the claim is valid, hasn't been responsed yet, and is being responded in time
         require(
-            keccak256(abi.encode(task)) == allTaskHashes[referenceTaskIndex],
-            "supplied task does not match the one recorded in the contract"
+            keccak256(abi.encode(claim)) == allClaimHashes[referenceClaimIndex],
+            "supplied claim does not match the one recorded in the contract"
         );
         require(
-            allTaskResponses[msg.sender][referenceTaskIndex].length == 0,
-            "Operator has already responded to the task"
+            allClaimResponses[msg.sender][referenceClaimIndex].length == 0,
+            "Operator has already responded to the claim"
         );
 
         // The message that was signed
-        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", task.name));
+        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", mergeAddresses(claim.pool, claim.insured)));
         bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
         bytes4 magicValue = IERC1271Upgradeable.isValidSignature.selector;
         if (!(magicValue == ECDSAStakeRegistry(stakeRegistry).isValidSignature(ethSignedMessageHash,signature))){
             revert();
         }
 
-        // updating the storage with task responses
-        allTaskResponses[msg.sender][referenceTaskIndex] = signature;
+        // updating the storage with claim responses
+        allClaimResponses[msg.sender][referenceClaimIndex] = signature;
+
+        // respond the result to pool
+        // TODO :: Activate this script to respond back to pool
+        // IInsurancePool(claim.pool).respondToClaim(claim, referenceClaimIndex);
 
         // emitting event
-        emit TaskResponded(referenceTaskIndex, task, msg.sender);
+        emit ClaimResponded(referenceClaimIndex, claim, msg.sender);
+    }
+
+    // Helper function to convert a single address to a string
+    function addressToString(address _address) internal pure returns (string memory) {
+        return string(
+            abi.encodePacked(
+                "0x",
+                uint256(uint160(_address)).toHexString(20)
+            )
+        );
+    }
+
+    // Function to merge two addresses into a single string with a space
+    function mergeAddresses(address _addr1, address _addr2) public pure returns (string memory) {
+        string memory str1 = addressToString(_addr1);
+        string memory str2 = addressToString(_addr2);
+        return string(abi.encodePacked(str1, " ", str2));
     }
 }

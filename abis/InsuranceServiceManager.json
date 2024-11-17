@@ -27,7 +27,7 @@
   },
   {
     "type": "function",
-    "name": "allTaskHashes",
+    "name": "allClaimHashes",
     "inputs": [
       {
         "name": "",
@@ -46,7 +46,7 @@
   },
   {
     "type": "function",
-    "name": "allTaskResponses",
+    "name": "allClaimResponses",
     "inputs": [
       {
         "name": "",
@@ -135,27 +135,42 @@
   },
   {
     "type": "function",
-    "name": "createNewTask",
+    "name": "createNewClaim",
     "inputs": [
       {
-        "name": "name",
-        "type": "string",
-        "internalType": "string"
+        "name": "pool",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "insured",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct IInsuranceServiceManager.Task",
+        "internalType": "struct IInsuranceServiceManager.Claim",
         "components": [
           {
-            "name": "name",
-            "type": "string",
-            "internalType": "string"
+            "name": "pool",
+            "type": "address",
+            "internalType": "address"
           },
           {
-            "name": "taskCreatedBlock",
+            "name": "insured",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "isApproved",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "claimCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
           }
@@ -211,7 +226,7 @@
   },
   {
     "type": "function",
-    "name": "latestTaskNum",
+    "name": "latestClaimNum",
     "inputs": [],
     "outputs": [
       {
@@ -221,6 +236,30 @@
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "mergeAddresses",
+    "inputs": [
+      {
+        "name": "_addr1",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_addr2",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -279,27 +318,37 @@
   },
   {
     "type": "function",
-    "name": "respondToTask",
+    "name": "respondToClaim",
     "inputs": [
       {
-        "name": "task",
+        "name": "claim",
         "type": "tuple",
-        "internalType": "struct IInsuranceServiceManager.Task",
+        "internalType": "struct IInsuranceServiceManager.Claim",
         "components": [
           {
-            "name": "name",
-            "type": "string",
-            "internalType": "string"
+            "name": "pool",
+            "type": "address",
+            "internalType": "address"
           },
           {
-            "name": "taskCreatedBlock",
+            "name": "insured",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "isApproved",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "claimCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
           }
         ]
       },
       {
-        "name": "referenceTaskIndex",
+        "name": "referenceClaimIndex",
         "type": "uint32",
         "internalType": "uint32"
       },
@@ -379,6 +428,53 @@
   },
   {
     "type": "event",
+    "name": "ClaimResponded",
+    "inputs": [
+      {
+        "name": "claimIndex",
+        "type": "uint32",
+        "indexed": true,
+        "internalType": "uint32"
+      },
+      {
+        "name": "claim",
+        "type": "tuple",
+        "indexed": false,
+        "internalType": "struct IInsuranceServiceManager.Claim",
+        "components": [
+          {
+            "name": "pool",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "insured",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "isApproved",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "claimCreatedBlock",
+            "type": "uint32",
+            "internalType": "uint32"
+          }
+        ]
+      },
+      {
+        "name": "operator",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "Initialized",
     "inputs": [
       {
@@ -392,27 +488,37 @@
   },
   {
     "type": "event",
-    "name": "NewTaskCreated",
+    "name": "NewClaimCreated",
     "inputs": [
       {
-        "name": "taskIndex",
+        "name": "claimIndex",
         "type": "uint32",
         "indexed": true,
         "internalType": "uint32"
       },
       {
-        "name": "task",
+        "name": "claim",
         "type": "tuple",
         "indexed": false,
-        "internalType": "struct IInsuranceServiceManager.Task",
+        "internalType": "struct IInsuranceServiceManager.Claim",
         "components": [
           {
-            "name": "name",
-            "type": "string",
-            "internalType": "string"
+            "name": "pool",
+            "type": "address",
+            "internalType": "address"
           },
           {
-            "name": "taskCreatedBlock",
+            "name": "insured",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "isApproved",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "claimCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
           }
@@ -452,43 +558,6 @@
       },
       {
         "name": "newRewardsInitiator",
-        "type": "address",
-        "indexed": false,
-        "internalType": "address"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "TaskResponded",
-    "inputs": [
-      {
-        "name": "taskIndex",
-        "type": "uint32",
-        "indexed": true,
-        "internalType": "uint32"
-      },
-      {
-        "name": "task",
-        "type": "tuple",
-        "indexed": false,
-        "internalType": "struct IInsuranceServiceManager.Task",
-        "components": [
-          {
-            "name": "name",
-            "type": "string",
-            "internalType": "string"
-          },
-          {
-            "name": "taskCreatedBlock",
-            "type": "uint32",
-            "internalType": "uint32"
-          }
-        ]
-      },
-      {
-        "name": "operator",
         "type": "address",
         "indexed": false,
         "internalType": "address"

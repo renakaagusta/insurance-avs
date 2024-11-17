@@ -27,7 +27,7 @@ import {IInsuranceServiceManager} from "../src/IInsuranceServiceManager.sol";
 import {ECDSAUpgradeable} from
     "@openzeppelin-upgrades/contracts/utils/cryptography/ECDSAUpgradeable.sol";
 
-contract InsuranceTaskManagerSetup is Test {
+contract InsuranceClaimManagerSetup is Test {
     Quorum internal quorum;
 
     struct Operator {
@@ -241,21 +241,21 @@ contract InsuranceTaskManagerSetup is Test {
         return signatures;
     }
 
-    function createTask(TrafficGenerator memory generator, string memory taskName) internal {
+    function createClaim(TrafficGenerator memory generator, address pool, address insured) internal {
         IInsuranceServiceManager insuranceServiceManager =
             IInsuranceServiceManager(insuranceDeployment.insuranceServiceManager);
 
         vm.prank(generator.key.addr);
-        insuranceServiceManager.createNewTask(taskName);
+        insuranceServiceManager.createNewClaim(pool, insured);
     }
 
-    function respondToTask(
+    function respondToClaim(
         Operator memory operator,
-        IInsuranceServiceManager.Task memory task,
-        uint32 referenceTaskIndex
+        IInsuranceServiceManager.Claim memory claim,
+        uint32 referenceClaimIndex
     ) internal {
         // Create the message hash
-        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", task.name));
+        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", mergeAddresses(claim.pool, claim.insured)));
 
         bytes memory signature = signWithSigningKey(operator, messageHash);
 
@@ -264,15 +264,40 @@ contract InsuranceTaskManagerSetup is Test {
         bytes[] memory signatures = new bytes[](1);
         signatures[0]= signature;
 
-        bytes memory signedTask = abi.encode(operators, signatures, uint32(block.number));
+        bytes memory signedClaim = abi.encode(operators, signatures, uint32(block.number));
 
-        IInsuranceServiceManager(insuranceDeployment.insuranceServiceManager).respondToTask(
-            task, referenceTaskIndex, signedTask
+        IInsuranceServiceManager(insuranceDeployment.insuranceServiceManager).respondToClaim(
+            claim, referenceClaimIndex, signedClaim
         );
+    }
+
+    // Helper function to convert a single address to a string
+    function addressToString(address _address) internal pure returns (string memory) {
+        bytes20 addressBytes = bytes20(_address);
+        bytes memory hexChars = "0123456789abcdef";
+        bytes memory str = new bytes(42); // "0x" + 40 hex characters
+
+        str[0] = '0';
+        str[1] = 'x';
+        
+        for (uint i = 0; i < 20; i++) {
+            // Extract each byte and convert to two hex characters
+            str[2 + i * 2] = hexChars[uint8(addressBytes[i] >> 4)];
+            str[3 + i * 2] = hexChars[uint8(addressBytes[i] & 0x0f)];
+        }
+
+        return string(str);
+    }
+
+    // Function to merge two addresses into a single string with a space
+    function mergeAddresses(address _addr1, address _addr2) public pure returns (string memory) {
+        string memory str1 = addressToString(_addr1);
+        string memory str2 = addressToString(_addr2);
+        return string(abi.encodePacked(str1, " ", str2));
     }
 }
 
-contract InsuranceServiceManagerInitialization is InsuranceTaskManagerSetup {
+contract InsuranceServiceManagerInitialization is InsuranceClaimManagerSetup {
     function testInitialization() public view {
         ECDSAStakeRegistry stakeRegistry = ECDSAStakeRegistry(insuranceDeployment.stakeRegistry);
 
@@ -299,7 +324,7 @@ contract InsuranceServiceManagerInitialization is InsuranceTaskManagerSetup {
     }
 }
 
-contract RegisterOperator is InsuranceTaskManagerSetup {
+contract RegisterOperator is InsuranceClaimManagerSetup {
     uint256 internal constant INITIAL_BALANCE = 100 ether;
     uint256 internal constant DEPOSIT_AMOUNT = 1 ether;
     uint256 internal constant OPERATOR_COUNT = 4;
@@ -361,7 +386,7 @@ contract RegisterOperator is InsuranceTaskManagerSetup {
     }
 }
 
-contract CreateTask is InsuranceTaskManagerSetup {
+contract CreateClaim is InsuranceClaimManagerSetup {
     IInsuranceServiceManager internal sm;
 
     function setUp() public override {
@@ -369,15 +394,16 @@ contract CreateTask is InsuranceTaskManagerSetup {
         sm = IInsuranceServiceManager(insuranceDeployment.insuranceServiceManager);
     }
 
-    function testCreateTask() public {
-        string memory taskName = "Test Task";
+    function testCreateClaim() public {
+        address pool = vm.addr(1);
+        address insured = vm.addr(2);
 
         vm.prank(generator.key.addr);
-        IInsuranceServiceManager.Task memory newTask = sm.createNewTask(taskName);
+        IInsuranceServiceManager.Claim memory newClaim = sm.createNewClaim(pool, insured);
     }
 }
 
-contract RespondToTask is InsuranceTaskManagerSetup {
+contract RespondToClaim is InsuranceClaimManagerSetup {
     using ECDSAUpgradeable for bytes32;
 
     uint256 internal constant INITIAL_BALANCE = 100 ether;
@@ -414,12 +440,13 @@ contract RespondToTask is InsuranceTaskManagerSetup {
         }
     }
 
-    function testRespondToTask() public {
-        string memory taskName = "TestTask";
-        IInsuranceServiceManager.Task memory newTask = sm.createNewTask(taskName);
-        uint32 taskIndex = sm.latestTaskNum() - 1;
+    function testRespondToClaim() public {
+        address pool  = vm.addr(1);
+        address insured  = vm.addr(2);
+        IInsuranceServiceManager.Claim memory newClaim = sm.createNewClaim(pool, insured);
+        uint32 claimIndex = sm.latestClaimNum() - 1;
 
-        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", taskName));
+        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", mergeAddresses(pool, insured)));
         bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
         bytes memory signature = signWithSigningKey(operators[0], ethSignedMessageHash); // TODO: Use signing key after changes to service manager
 
@@ -428,9 +455,9 @@ contract RespondToTask is InsuranceTaskManagerSetup {
         bytes[] memory signatures = new bytes[](1);
         signatures[0]= signature;
 
-        bytes memory signedTask = abi.encode(operatorsMem, signatures, uint32(block.number));
+        bytes memory signedClaim = abi.encode(operatorsMem, signatures, uint32(block.number));
 
         vm.roll(block.number+1);
-        sm.respondToTask(newTask, taskIndex, signedTask);
+        sm.respondToClaim(newClaim, claimIndex, signedClaim);
     }
 }

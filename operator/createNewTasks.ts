@@ -16,38 +16,38 @@ const insuranceServiceManagerABI = JSON.parse(fs.readFileSync(path.resolve(__dir
 // Initialize contract objects from ABIs
 const insuranceServiceManager = new ethers.Contract(insuranceServiceManagerAddress, insuranceServiceManagerABI, wallet);
 
-// Function to generate random names
-function generateRandomName(): string {
-    const adjectives = ['Quick', 'Lazy', 'Sleepy', 'Noisy', 'Hungry'];
-    const nouns = ['Fox', 'Dog', 'Cat', 'Mouse', 'Bear'];
-    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const noun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomName = `${adjective}${noun}${Math.floor(Math.random() * 1000)}`;
-    return randomName;
+function generateRandomAddress() {
+  const hexChars = '0123456789abcdef';
+  let address = '0x';
+  for (let i = 0; i < 40; i++) {
+    address += hexChars[Math.floor(Math.random() * 16)];
   }
+  return address;
+}
 
-async function createNewTask(taskName: string) {
+async function createNewClaim(pool: string, insured: string) {
   try {
-    // Send a transaction to the createNewTask function
-    const tx = await insuranceServiceManager.createNewTask(taskName);
-    
+    // Send a transaction to the createNewClaim function
+    const tx = await insuranceServiceManager.createNewClaim(pool, insured);
+
     // Wait for the transaction to be mined
     const receipt = await tx.wait();
-    
+
     console.log(`Transaction successful with hash: ${receipt.hash}`);
   } catch (error) {
     console.error('Error sending transaction:', error);
   }
 }
 
-// Function to create a new task with a random name every 15 seconds
-function startCreatingTasks() {
+// Function to create a new claim with a random name every 15 seconds
+function startCreatingClaims() {
   setInterval(() => {
-    const randomName = generateRandomName();
-    console.log(`Creating new task with name: ${randomName}`);
-    createNewTask(randomName);
-  }, 24000);
+    const pool = generateRandomAddress();
+    const insured = generateRandomAddress();
+    console.log(`Creating new claim with pool: ${pool}, insured: ${insured}`);
+    createNewClaim(pool, insured);
+  }, 10000);
 }
 
 // Start the process
-startCreatingTasks();
+startCreatingClaims();

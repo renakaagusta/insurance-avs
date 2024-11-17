@@ -11,7 +11,7 @@ import "@eigenlayer/contracts/libraries/Merkle.sol";
 import "../script/DeployEigenLayerCore.s.sol";
 import "../script/InsuranceDeployer.s.sol";
 import {StrategyFactory} from "@eigenlayer/contracts/strategies/StrategyFactory.sol";
-import {InsuranceTaskManagerSetup} from "test/InsuranceServiceManager.t.sol";
+import {InsuranceClaimManagerSetup} from "test/InsuranceServiceManager.t.sol";
 import {
     Quorum,
     StrategyParams,
@@ -29,7 +29,7 @@ contract TestConstants {
     uint256 NUM_EARNERS = 4;
 }
 
-contract SetupPaymentsLibTest is Test, TestConstants, InsuranceTaskManagerSetup {
+contract SetupPaymentsLibTest is Test, TestConstants, InsuranceClaimManagerSetup {
     using SetupPaymentsLib for *;
     Vm cheats = Vm(VM_ADDRESS);
 

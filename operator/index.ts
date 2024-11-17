@@ -19,13 +19,10 @@ const avsDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `..
 // Load core deployment data
 const coreDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../contracts/deployments/core/${chainId}.json`), 'utf8'));
 
-
 const delegationManagerAddress = coreDeploymentData.addresses.delegation; // todo: reminder to fix the naming of this contract in the deployment file, change to delegationManager
 const avsDirectoryAddress = coreDeploymentData.addresses.avsDirectory;
 const insuranceServiceManagerAddress = avsDeploymentData.addresses.insuranceServiceManager;
 const ecdsaStakeRegistryAddress = avsDeploymentData.addresses.stakeRegistry;
-
-
 
 // Load ABIs
 const delegationManagerABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../abis/IDelegationManager.json'), 'utf8'));
@@ -39,33 +36,43 @@ const insuranceServiceManager = new ethers.Contract(insuranceServiceManagerAddre
 const ecdsaRegistryContract = new ethers.Contract(ecdsaStakeRegistryAddress, ecdsaRegistryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
 
+const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: number, pool: string, insured: string) => {
+    try {
+        const message = `Insurance, ${pool} ${insured}`;
+        const messageHash = ethers.solidityPackedKeccak256(["string"], [message]);
+        const messageBytes = ethers.getBytes(messageHash);
+        const signature = await wallet.signMessage(messageBytes);
 
-const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number, taskName: string) => {
-    const message = `Insurance, ${taskName}`;
-    const messageHash = ethers.solidityPackedKeccak256(["string"], [message]);
-    const messageBytes = ethers.getBytes(messageHash);
-    const signature = await wallet.signMessage(messageBytes);
+        console.log(`Signing and responding to claim ${claimIndex}`);
 
-    console.log(`Signing and responding to task ${taskIndex}`);
+        const operators = [await wallet.getAddress()];
+        const signatures = [signature];
+        const signedClaim = ethers.AbiCoder.defaultAbiCoder().encode(
+            ["address[]", "bytes[]", "uint32"],
+            [operators, signatures, ethers.toBigInt(await provider.getBlockNumber() - 1)]
+        );
 
-    const operators = [await wallet.getAddress()];
-    const signatures = [signature];
-    const signedTask = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["address[]", "bytes[]", "uint32"],
-        [operators, signatures, ethers.toBigInt(await provider.getBlockNumber()-1)]
-    );
+        let isApproved = false;
 
-    const tx = await insuranceServiceManager.respondToTask(
-        { name: taskName, taskCreatedBlock: taskCreatedBlock },
-        taskIndex,
-        signedTask
-    );
-    await tx.wait();
-    console.log(`Responded to task.`);
+        if (Math.random() * 10 % 2 == 0) {
+            isApproved = true;
+        } else {
+            isApproved = false;
+        }
+
+        const tx = await insuranceServiceManager.respondToClaim(
+            { pool: pool, insured: insured, isApproved: isApproved, claimCreatedBlock: claimCreatedBlock },
+            claimIndex,
+            signedClaim
+        );
+        await tx.wait();
+        console.log(`Responded to claim.`);
+    } catch (e) {
+        console.log('error', e)
+    }
 };
 
 const registerOperator = async () => {
-    
     // Registers as an Operator in EigenLayer.
     try {
         const tx1 = await delegationManager.registerAsOperator({
@@ -78,7 +85,7 @@ const registerOperator = async () => {
     } catch (error) {
         console.error("Error in registering as operator:", error);
     }
-    
+
     const salt = ethers.hexlify(ethers.randomBytes(32));
     const expiry = Math.floor(Date.now() / 1000) + 3600; // Example expiry, 1 hour from now
 
@@ -91,13 +98,13 @@ const registerOperator = async () => {
 
     // Calculate the digest hash, which is a unique value representing the operator, avs, unique value (salt) and expiration date.
     const operatorDigestHash = await avsDirectory.calculateOperatorAVSRegistrationDigestHash(
-        wallet.address, 
-        await insuranceServiceManager.getAddress(), 
-        salt, 
+        wallet.address,
+        await insuranceServiceManager.getAddress(),
+        salt,
         expiry
     );
     console.log(operatorDigestHash);
-    
+
     // Sign the digest hash with the operator's private key
     console.log("Signing digest hash with operator's private key");
     const operatorSigningKey = new ethers.SigningKey(process.env.PRIVATE_KEY!);
@@ -108,7 +115,7 @@ const registerOperator = async () => {
 
     console.log("Registering Operator to AVS Registry contract");
 
-    
+
     // Register Operator to AVS
     // Per release here: https://github.com/Layr-Labs/eigenlayer-middleware/blob/v0.2.1-mainnet-rewards/src/unaudited/ECDSAStakeRegistry.sol#L49
     const tx2 = await ecdsaRegistryContract.registerOperatorWithSignature(
@@ -119,22 +126,22 @@ const registerOperator = async () => {
     console.log("Operator registered on AVS successfully");
 };
 
-const monitorNewTasks = async () => {
-    //console.log(`Creating new task "EigenWorld"`);
-    //await insuranceServiceManager.createNewTask("EigenWorld");
+const monitorNewClaims = async () => {
+    //console.log(`Creating new claim "EigenWorld"`);
+    //await insuranceServiceManager.createNewClaim("EigenWorld");
 
-    insuranceServiceManager.on("NewTaskCreated", async (taskIndex: number, task: any) => {
-        console.log(`New task detected: Insurance, ${task.name}`);
-        await signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name);
+    insuranceServiceManager.on("NewClaimCreated", async (claimIndex: number, claim: any) => {
+        console.log(`New claim detected: Insurance, ${claim.pool} ${claim.insured}`);
+        await signAndRespondToClaim(claimIndex, claim.claimCreatedBlock, claim.pool, claim.insured);
     });
 
-    console.log("Monitoring for new tasks...");
+    console.log("Monitoring for new claims...");
 };
 
 const main = async () => {
     await registerOperator();
-    monitorNewTasks().catch((error) => {
-        console.error("Error monitoring tasks:", error);
+    monitorNewClaims().catch((error) => {
+        console.error("Error monitoring claims:", error);
     });
 };
 
