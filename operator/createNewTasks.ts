@@ -10,12 +10,11 @@ const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 /// TODO: Hack
 let chainId = 31337;
 
-const avsDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../contracts/deployments/hello-world/${chainId}.json`), 'utf8'));
-const helloWorldServiceManagerAddress = avsDeploymentData.addresses.helloWorldServiceManager;
-const helloWorldServiceManagerABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../abis/HelloWorldServiceManager.json'), 'utf8'));
+const avsDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../contracts/deployments/insurance/${chainId}.json`), 'utf8'));
+const insuranceServiceManagerAddress = avsDeploymentData.addresses.insuranceServiceManager;
+const insuranceServiceManagerABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../abis/InsuranceServiceManager.json'), 'utf8'));
 // Initialize contract objects from ABIs
-const helloWorldServiceManager = new ethers.Contract(helloWorldServiceManagerAddress, helloWorldServiceManagerABI, wallet);
-
+const insuranceServiceManager = new ethers.Contract(insuranceServiceManagerAddress, insuranceServiceManagerABI, wallet);
 
 // Function to generate random names
 function generateRandomName(): string {
@@ -30,7 +29,7 @@ function generateRandomName(): string {
 async function createNewTask(taskName: string) {
   try {
     // Send a transaction to the createNewTask function
-    const tx = await helloWorldServiceManager.createNewTask(taskName);
+    const tx = await insuranceServiceManager.createNewTask(taskName);
     
     // Wait for the transaction to be mined
     const receipt = await tx.wait();

@@ -1,6 +1,6 @@
 #![cfg(not(doctest))]
 #[allow(clippy::all, clippy::pedantic, unused_imports)]
-pub mod helloworldservicemanager;
+pub mod insuranceservicemanager;
 
 #[allow(clippy::all, clippy::pedantic, unused_imports)]
 pub mod ecdsastakeregistry;
@@ -10,10 +10,10 @@ use serde::Deserialize;
 
 #[allow(unused)]
 #[derive(Deserialize, Debug)]
-pub struct HelloWorldData {
+pub struct InsuranceData {
     #[serde(rename = "lastUpdate")]
     last_update: LastUpdate,
-    pub addresses: HelloWorldAddresses,
+    pub addresses: InsuranceAddresses,
 }
 
 #[allow(unused)]
@@ -25,13 +25,13 @@ struct LastUpdate {
 
 #[allow(unused)]
 #[derive(Deserialize, Debug)]
-pub struct HelloWorldAddresses {
+pub struct InsuranceAddresses {
     #[serde(rename = "proxyAdmin")]
     _proxy_admin: String,
-    #[serde(rename = "helloWorldServiceManager")]
-    pub hello_world_service_manager: String,
-    #[serde(rename = "helloWorldServiceManagerImpl")]
-    hello_world_service_manager_impl: String,
+    #[serde(rename = "insuranceServiceManager")]
+    pub insurance_service_manager: String,
+    #[serde(rename = "insuranceServiceManagerImpl")]
+    insurance_service_manager_impl: String,
     #[serde(rename = "stakeRegistry")]
     pub stake_registry: String,
     #[serde(rename = "stakeRegistryImpl")]
@@ -76,17 +76,17 @@ pub struct EigenLayerAddresses {
     strategy_beacon: String,
 }
 
-pub fn parse_hello_world_service_manager(path: &str) -> eyre::Result<Address> {
+pub fn parse_insurance_service_manager(path: &str) -> eyre::Result<Address> {
     let data = std::fs::read_to_string(path)?;
-    let parsed: HelloWorldData = serde_json::from_str(&data)?;
-    let hello_world_contract_address: Address =
-        parsed.addresses.hello_world_service_manager.parse()?;
-    Ok(hello_world_contract_address)
+    let parsed: InsuranceData = serde_json::from_str(&data)?;
+    let insurance_contract_address: Address =
+        parsed.addresses.insurance_service_manager.parse()?;
+    Ok(insurance_contract_address)
 }
 
 pub fn parse_stake_registry_address(path: &str) -> eyre::Result<Address> {
     let data = std::fs::read_to_string(path)?;
-    let parsed: HelloWorldData = serde_json::from_str(&data)?;
+    let parsed: InsuranceData = serde_json::from_str(&data)?;
     let stake_registry_address: Address = parsed.addresses.stake_registry.parse()?;
     Ok(stake_registry_address)
 }

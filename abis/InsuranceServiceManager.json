@@ -13,6 +13,11 @@
         "internalType": "address"
       },
       {
+        "name": "_rewardsCoordinator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "_delegationManager",
         "type": "address",
         "internalType": "address"
@@ -142,7 +147,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct IHelloWorldServiceManager.Task",
+        "internalType": "struct IInsuranceServiceManager.Task",
         "components": [
           {
             "name": "name",
@@ -279,7 +284,7 @@
       {
         "name": "task",
         "type": "tuple",
-        "internalType": "struct IHelloWorldServiceManager.Task",
+        "internalType": "struct IInsuranceServiceManager.Task",
         "components": [
           {
             "name": "name",
@@ -399,7 +404,7 @@
         "name": "task",
         "type": "tuple",
         "indexed": false,
-        "internalType": "struct IHelloWorldServiceManager.Task",
+        "internalType": "struct IInsuranceServiceManager.Task",
         "components": [
           {
             "name": "name",
@@ -468,7 +473,7 @@
         "name": "task",
         "type": "tuple",
         "indexed": false,
-        "internalType": "struct IHelloWorldServiceManager.Task",
+        "internalType": "struct IInsuranceServiceManager.Task",
         "components": [
           {
             "name": "name",

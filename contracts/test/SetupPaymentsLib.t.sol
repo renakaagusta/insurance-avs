@@ -4,14 +4,14 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "../script/utils/SetupPaymentsLib.sol";
 import "../script/utils/CoreDeploymentLib.sol";
-import "../script/utils/HelloWorldDeploymentLib.sol";
+import "../script/utils/InsuranceDeploymentLib.sol";
 import "@eigenlayer/contracts/interfaces/IRewardsCoordinator.sol";
 import "@eigenlayer/contracts/interfaces/IStrategy.sol";
 import "@eigenlayer/contracts/libraries/Merkle.sol";
 import "../script/DeployEigenLayerCore.s.sol";
-import "../script/HelloWorldDeployer.s.sol";
+import "../script/InsuranceDeployer.s.sol";
 import {StrategyFactory} from "@eigenlayer/contracts/strategies/StrategyFactory.sol";
-import {HelloWorldTaskManagerSetup} from "test/HelloWorldServiceManager.t.sol";
+import {InsuranceTaskManagerSetup} from "test/InsuranceServiceManager.t.sol";
 import {
     Quorum,
     StrategyParams,
@@ -29,7 +29,7 @@ contract TestConstants {
     uint256 NUM_EARNERS = 4;
 }
 
-contract SetupPaymentsLibTest is Test, TestConstants, HelloWorldTaskManagerSetup {
+contract SetupPaymentsLibTest is Test, TestConstants, InsuranceTaskManagerSetup {
     using SetupPaymentsLib for *;
     Vm cheats = Vm(VM_ADDRESS);
 
@@ -52,9 +52,9 @@ contract SetupPaymentsLibTest is Test, TestConstants, HelloWorldTaskManagerSetup
         strategy = addStrategy(address(mockToken)); // Similar function to HW_SM test using strategy factory
         quorum.strategies.push(StrategyParams({strategy: strategy, multiplier: 10_000}));
 
-        helloWorldDeployment =
-            HelloWorldDeploymentLib.deployContracts(proxyAdmin, coreDeployment, quorum);
-        labelContracts(coreDeployment, helloWorldDeployment);
+        insuranceDeployment =
+            InsuranceDeploymentLib.deployContracts(proxyAdmin, coreDeployment, quorum);
+        labelContracts(coreDeployment, insuranceDeployment);
 
         rewardsCoordinator = IRewardsCoordinator(coreDeployment.rewardsCoordinator);
         mockToken.mint(address(this), 100000);

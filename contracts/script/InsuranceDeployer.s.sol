@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {Script} from "forge-std/Script.sol";
 import {console2} from "forge-std/Test.sol";
-import {HelloWorldDeploymentLib} from "./utils/HelloWorldDeploymentLib.sol";
+import {InsuranceDeploymentLib} from "./utils/InsuranceDeploymentLib.sol";
 import {CoreDeploymentLib} from "./utils/CoreDeploymentLib.sol";
 import {UpgradeableProxyLib} from "./utils/UpgradeableProxyLib.sol";
 import {StrategyBase} from "@eigenlayer/contracts/strategies/StrategyBase.sol";
@@ -20,15 +20,15 @@ import {
     IStrategy
 } from "@eigenlayer-middleware/src/interfaces/IECDSAStakeRegistryEventsAndErrors.sol";
 
-contract HelloWorldDeployer is Script {
+contract InsuranceDeployer is Script {
     using CoreDeploymentLib for *;
     using UpgradeableProxyLib for address;
 
     address private deployer;
     address proxyAdmin;
-    IStrategy helloWorldStrategy;
+    IStrategy insuranceStrategy;
     CoreDeploymentLib.DeploymentData coreDeployment;
-    HelloWorldDeploymentLib.DeploymentData helloWorldDeployment;
+    InsuranceDeploymentLib.DeploymentData insuranceDeployment;
     Quorum internal quorum;
     ERC20Mock token;
     function setUp() public virtual {
@@ -38,10 +38,10 @@ contract HelloWorldDeployer is Script {
         coreDeployment = CoreDeploymentLib.readDeploymentJson("deployments/core/", block.chainid);
        
         token = new ERC20Mock();
-        helloWorldStrategy = IStrategy(StrategyFactory(coreDeployment.strategyFactory).deployNewStrategy(token));
+        insuranceStrategy = IStrategy(StrategyFactory(coreDeployment.strategyFactory).deployNewStrategy(token));
 
         quorum.strategies.push(
-            StrategyParams({strategy: helloWorldStrategy, multiplier: 10_000})
+            StrategyParams({strategy: insuranceStrategy, multiplier: 10_000})
         );
     }
 
@@ -49,26 +49,26 @@ contract HelloWorldDeployer is Script {
         vm.startBroadcast(deployer);
         proxyAdmin = UpgradeableProxyLib.deployProxyAdmin();
 
-        helloWorldDeployment =
-            HelloWorldDeploymentLib.deployContracts(proxyAdmin, coreDeployment, quorum);
+        insuranceDeployment =
+            InsuranceDeploymentLib.deployContracts(proxyAdmin, coreDeployment, quorum);
 
-        helloWorldDeployment.strategy = address(helloWorldStrategy);
-        helloWorldDeployment.token = address(token);
+        insuranceDeployment.strategy = address(insuranceStrategy);
+        insuranceDeployment.token = address(token);
         vm.stopBroadcast();
 
         verifyDeployment();
-        HelloWorldDeploymentLib.writeDeploymentJson(helloWorldDeployment);
+        InsuranceDeploymentLib.writeDeploymentJson(insuranceDeployment);
     }
 
     function verifyDeployment() internal view {
         require(
-            helloWorldDeployment.stakeRegistry != address(0), "StakeRegistry address cannot be zero"
+            insuranceDeployment.stakeRegistry != address(0), "StakeRegistry address cannot be zero"
         );
         require(
-            helloWorldDeployment.helloWorldServiceManager != address(0),
-            "HelloWorldServiceManager address cannot be zero"
+            insuranceDeployment.insuranceServiceManager != address(0),
+            "InsuranceServiceManager address cannot be zero"
         );
-        require(helloWorldDeployment.strategy != address(0), "Strategy address cannot be zero");
+        require(insuranceDeployment.strategy != address(0), "Strategy address cannot be zero");
         require(proxyAdmin != address(0), "ProxyAdmin address cannot be zero");
         require(
             coreDeployment.delegationManager != address(0),

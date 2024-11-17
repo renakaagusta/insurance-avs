@@ -1,6 +1,6 @@
 [package]
-name = "hello-world-utils"
-description = "Hello world avs operator start and spam utilities"
+name = "insurance-utils"
+description = "Insurance world avs operator start and spam utilities"
 
 version.workspace = true
 edition.workspace = true

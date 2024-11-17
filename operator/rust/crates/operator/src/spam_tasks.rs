@@ -4,7 +4,7 @@ use dotenv::dotenv;
 use eigen_logging::{get_logger, init_logger, log_level::LogLevel};
 use eigen_utils::get_signer;
 use eyre::Result;
-use hello_world_utils::{helloworldservicemanager::HelloWorldServiceManager, HelloWorldData};
+use insurance_utils::{insuranceservicemanager::InsuranceServiceManager, InsuranceData};
 use once_cell::sync::Lazy;
 use rand::Rng;
 use std::{env, str::FromStr};
@@ -32,17 +32,17 @@ fn generate_random_name() -> String {
 }
 
 #[allow(unused)]
-/// Calls CreateNewTask function of the Hello world service manager contract
+/// Calls CreateNewTask function of the Insurance world service manager contract
 async fn create_new_task(task_name: &str) -> Result<()> {
-    let data = std::fs::read_to_string("contracts/deployments/hello-world/31337.json")?;
-    let parsed: HelloWorldData = serde_json::from_str(&data)?;
-    let hello_world_contract_address: Address =
-        parsed.addresses.hello_world_service_manager.parse()?;
+    let data = std::fs::read_to_string("contracts/deployments/insurance/31337.json")?;
+    let parsed: InsuranceData = serde_json::from_str(&data)?;
+    let insurance_contract_address: Address =
+        parsed.addresses.insurance_service_manager.parse()?;
     let pr = get_signer(&KEY.clone(), ANVIL_RPC_URL);
     let signer = PrivateKeySigner::from_str(&KEY.clone())?;
-    let hello_world_contract = HelloWorldServiceManager::new(hello_world_contract_address, pr);
+    let insurance_contract = InsuranceServiceManager::new(insurance_contract_address, pr);
 
-    let tx = hello_world_contract
+    let tx = insurance_contract
         .createNewTask(task_name.to_string())
         .send()
         .await?

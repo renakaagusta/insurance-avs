@@ -23,21 +23,21 @@ async function loadJsonFile(filePath: string): Promise<any> {
 
 async function loadDeployments(): Promise<Record<string, any>> {
   const coreFilePath = path.join(__dirname, '..', 'contracts', 'deployments', 'core', '31337.json');
-  const helloWorldFilePath = path.join(__dirname, '..', 'contracts', 'deployments', 'hello-world', '31337.json');
+  const insuranceFilePath = path.join(__dirname, '..', 'contracts', 'deployments', 'insurance', '31337.json');
 
-  const [coreDeployment, helloWorldDeployment] = await Promise.all([
+  const [coreDeployment, insuranceDeployment] = await Promise.all([
     loadJsonFile(coreFilePath),
-    loadJsonFile(helloWorldFilePath)
+    loadJsonFile(insuranceFilePath)
   ]);
 
-  if (!coreDeployment || !helloWorldDeployment) {
+  if (!coreDeployment || !insuranceDeployment) {
     console.error('Error loading deployments');
     return {};
   }
 
   return {
     core: coreDeployment,
-    helloWorld: helloWorldDeployment
+    insurance: insuranceDeployment
   };
 }
 
@@ -47,7 +47,7 @@ describe('Operator Functionality', () => {
   let provider: ethers.JsonRpcProvider;
   let signer: ethers.Wallet;
   let delegationManager: ethers.Contract;
-  let helloWorldServiceManager: ethers.Contract;
+  let insuranceServiceManager: ethers.Contract;
   let ecdsaRegistryContract: ethers.Contract;
   let avsDirectory: ethers.Contract;
 
@@ -55,7 +55,7 @@ describe('Operator Functionality', () => {
     anvil = createAnvil();
     await anvil.start();
     await execAsync('npm run deploy:core');
-    await execAsync('npm run deploy:hello-world');
+    await execAsync('npm run deploy:insurance');
     deployment = await loadDeployments();
 
     provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
@@ -63,12 +63,12 @@ describe('Operator Functionality', () => {
 
     const delegationManagerABI = await loadJsonFile(path.join(__dirname, '..', 'abis', 'IDelegationManager.json'));
     const ecdsaRegistryABI = await loadJsonFile(path.join(__dirname, '..', 'abis', 'ECDSAStakeRegistry.json'));
-    const helloWorldServiceManagerABI = await loadJsonFile(path.join(__dirname, '..', 'abis', 'HelloWorldServiceManager.json'));
+    const insuranceServiceManagerABI = await loadJsonFile(path.join(__dirname, '..', 'abis', 'InsuranceServiceManager.json'));
     const avsDirectoryABI = await loadJsonFile(path.join(__dirname, '..', 'abis', 'IAVSDirectory.json'));
 
     delegationManager = new ethers.Contract(deployment.core.addresses.delegation, delegationManagerABI, signer);
-    helloWorldServiceManager = new ethers.Contract(deployment.helloWorld.addresses.helloWorldServiceManager, helloWorldServiceManagerABI, signer);
-    ecdsaRegistryContract = new ethers.Contract(deployment.helloWorld.addresses.stakeRegistry, ecdsaRegistryABI, signer);
+    insuranceServiceManager = new ethers.Contract(deployment.insurance.addresses.insuranceServiceManager, insuranceServiceManagerABI, signer);
+    ecdsaRegistryContract = new ethers.Contract(deployment.insurance.addresses.stakeRegistry, ecdsaRegistryABI, signer);
     avsDirectory = new ethers.Contract(deployment.core.addresses.avsDirectory, avsDirectoryABI, signer);
   });
 
@@ -90,7 +90,7 @@ describe('Operator Functionality', () => {
 
     const operatorDigestHash = await avsDirectory.calculateOperatorAVSRegistrationDigestHash(
       signer.address,
-      await helloWorldServiceManager.getAddress(),
+      await insuranceServiceManager.getAddress(),
       salt,
       expiry
     );
@@ -116,7 +116,7 @@ describe('Operator Functionality', () => {
   it('should create a new task', async () => {
     const taskName = "Steven";
 
-    const tx = await helloWorldServiceManager.createNewTask(taskName);
+    const tx = await insuranceServiceManager.createNewTask(taskName);
     await tx.wait();
   });
 
@@ -124,7 +124,7 @@ describe('Operator Functionality', () => {
     const taskIndex = 0;
     const taskCreatedBlock = await provider.getBlockNumber();
     const taskName = "Steven";
-    const message = `Hello, ${taskName}`;
+    const message = `Insurance, ${taskName}`;
     const messageHash = ethers.solidityPackedKeccak256(["string"], [message]);
     const messageBytes = ethers.getBytes(messageHash);
     const signature = await signer.signMessage(messageBytes);
@@ -136,7 +136,7 @@ describe('Operator Functionality', () => {
         [operators, signatures, ethers.toBigInt(taskCreatedBlock)]
     );
 
-    const tx = await helloWorldServiceManager.respondToTask(
+    const tx = await insuranceServiceManager.respondToTask(
         { name: taskName, taskCreatedBlock: taskCreatedBlock },
         taskIndex,
         signedTask

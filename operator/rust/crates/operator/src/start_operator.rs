@@ -16,13 +16,13 @@ use eigen_client_elcontracts::{
 use eigen_logging::{get_logger, init_logger, log_level::LogLevel};
 use eigen_utils::{get_provider, get_signer};
 use eyre::Result;
-use hello_world_utils::ecdsastakeregistry::ECDSAStakeRegistry;
-use hello_world_utils::{
+use insurance_utils::ecdsastakeregistry::ECDSAStakeRegistry;
+use insurance_utils::{
     ecdsastakeregistry::ISignatureUtils::SignatureWithSaltAndExpiry,
-    helloworldservicemanager::{HelloWorldServiceManager, IHelloWorldServiceManager::Task},
+    insuranceservicemanager::{InsuranceServiceManager, IInsuranceServiceManager::Task},
 };
-use hello_world_utils::{
-    parse_hello_world_service_manager, parse_stake_registry_address, EigenLayerData,
+use insurance_utils::{
+    parse_insurance_service_manager, parse_stake_registry_address, EigenLayerData,
 };
 use once_cell::sync::Lazy;
 use rand::RngCore;
@@ -41,7 +41,7 @@ async fn sign_and_response_to_task(
     let pr = get_signer(&KEY.clone(), ANVIL_RPC_URL);
     let signer = PrivateKeySigner::from_str(&KEY.clone())?;
 
-    let message = format!("Hello, {}", name);
+    let message = format!("Insurance, {}", name);
     let m_hash = eip191_hash_message(keccak256(message.abi_encode_packed()));
     let operators: Vec<DynSolValue> = vec![DynSolValue::Address(signer.address())];
     let signature: Vec<DynSolValue> =
@@ -58,11 +58,11 @@ async fn sign_and_response_to_task(
         &format!("Signing and responding to task : {:?}", task_index),
         "",
     );
-    let hello_world_contract_address: Address =
-        parse_hello_world_service_manager("contracts/deployments/hello-world/31337.json")?;
-    let hello_world_contract = HelloWorldServiceManager::new(hello_world_contract_address, &pr);
+    let insurance_contract_address: Address =
+        parse_insurance_service_manager("contracts/deployments/insurance/31337.json")?;
+    let insurance_contract = InsuranceServiceManager::new(insurance_contract_address, &pr);
 
-    let response_hash = hello_world_contract
+    let response_hash = insurance_contract
         .respondToTask(
             Task {
                 name,
@@ -87,28 +87,28 @@ async fn sign_and_response_to_task(
 /// Monitor new tasks
 async fn monitor_new_tasks() -> Result<()> {
     let pr = get_signer(&KEY.clone(), ANVIL_RPC_URL);
-    let hello_world_contract_address: Address =
-        parse_hello_world_service_manager("contracts/deployments/hello-world/31337.json")?;
+    let insurance_contract_address: Address =
+        parse_insurance_service_manager("contracts/deployments/insurance/31337.json")?;
     let mut latest_processed_block = pr.get_block_number().await?;
 
     loop {
         get_logger().info("Monitoring for new tasks...", "");
 
         let filter = Filter::new()
-            .address(hello_world_contract_address)
+            .address(insurance_contract_address)
             .from_block(BlockNumberOrTag::Number(latest_processed_block));
 
         let logs = pr.get_logs(&filter).await?;
 
         for log in logs {
             match log.topic0() {
-                Some(&HelloWorldServiceManager::NewTaskCreated::SIGNATURE_HASH) => {
-                    let HelloWorldServiceManager::NewTaskCreated { taskIndex, task } = log
+                Some(&InsuranceServiceManager::NewTaskCreated::SIGNATURE_HASH) => {
+                    let InsuranceServiceManager::NewTaskCreated { taskIndex, task } = log
                         .log_decode()
                         .expect("Failed to decode log new task created")
                         .inner
                         .data;
-                    get_logger().info(&format!("New task detected :Hello{:?} ", task.name), "");
+                    get_logger().info(&format!("New task detected :Insurance{:?} ", task.name), "");
 
                     let _ = sign_and_response_to_task(taskIndex, task.taskCreatedBlock, task.name)
                         .await;
@@ -182,12 +182,12 @@ async fn register_operator() -> Result<()> {
     let now = Utc::now().timestamp();
     let expiry: U256 = U256::from(now + 3600);
 
-    let hello_world_contract_address: Address =
-        parse_hello_world_service_manager("contracts/deployments/hello-world/31337.json")?;
+    let insurance_contract_address: Address =
+        parse_insurance_service_manager("contracts/deployments/insurance/31337.json")?;
     let digest_hash = elcontracts_reader_instance
         .calculate_operator_avs_registration_digest_hash(
             signer.address(),
-            hello_world_contract_address,
+            insurance_contract_address,
             salt,
             expiry,
         )
@@ -200,7 +200,7 @@ async fn register_operator() -> Result<()> {
         expiry: expiry,
     };
     let stake_registry_address =
-        parse_stake_registry_address("contracts/deployments/hello-world/31337.json")?;
+        parse_stake_registry_address("contracts/deployments/insurance/31337.json")?;
     let contract_ecdsa_stake_registry = ECDSAStakeRegistry::new(stake_registry_address, &pr);
     let registeroperator_details_call: alloy::contract::CallBuilder<
         _,
@@ -210,7 +210,7 @@ async fn register_operator() -> Result<()> {
     > = contract_ecdsa_stake_registry
         .registerOperatorWithSignature(operator_signature, signer.clone().address())
         .gas(500000);
-    let register_hello_world_hash = registeroperator_details_call
+    let register_insurance_hash = registeroperator_details_call
         .send()
         .await?
         .get_receipt()
@@ -221,7 +221,7 @@ async fn register_operator() -> Result<()> {
         &format!(
             "Operator registered on AVS successfully :{} , tx_hash :{}",
             signer.address(),
-            register_hello_world_hash
+            register_insurance_hash
         ),
         &"",
     );
