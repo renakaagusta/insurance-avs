@@ -38,7 +38,7 @@ const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, w
 
 const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: number, pool: string, insured: string) => {
     try {
-        const message = `Insurance, ${pool} ${insured}`;
+        const message = `Insurance, ${claimIndex}`;
         const messageHash = ethers.solidityPackedKeccak256(["string"], [message]);
         const messageBytes = ethers.getBytes(messageHash);
         const signature = await wallet.signMessage(messageBytes);

@@ -97,7 +97,7 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
         );
 
         // The message that was signed
-        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", mergeAddresses(claim.pool, claim.insured)));
+        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", uint256(referenceClaimIndex).toString()));
         bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
         bytes4 magicValue = IERC1271Upgradeable.isValidSignature.selector;
         if (!(magicValue == ECDSAStakeRegistry(stakeRegistry).isValidSignature(ethSignedMessageHash,signature))){
