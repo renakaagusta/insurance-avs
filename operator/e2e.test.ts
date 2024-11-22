@@ -22,8 +22,8 @@ async function loadJsonFile(filePath: string): Promise<any> {
 }
 
 async function loadDeployments(): Promise<Record<string, any>> {
-  const coreFilePath = path.join(__dirname, '..', 'contracts', 'deployments', 'core', '31337.json');
-  const insuranceFilePath = path.join(__dirname, '..', 'contracts', 'deployments', 'insurance', '31337.json');
+  const coreFilePath = path.join(__dirname, '..', 'contracts', 'deployments', 'core', '1.json');
+  const insuranceFilePath = path.join(__dirname, '..', 'contracts', 'deployments', 'insurance', '1.json');
 
   const [coreDeployment, insuranceDeployment] = await Promise.all([
     loadJsonFile(coreFilePath),

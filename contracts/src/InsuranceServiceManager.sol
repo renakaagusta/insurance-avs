@@ -15,6 +15,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 
+import {IInsuranceFactory} from "./IInsuranceFactory.sol";
 import {IInsurancePool} from "./IInsurancePool.sol";
 
 /**
@@ -26,6 +27,9 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
     using Strings for uint256;
 
     uint32 public latestClaimNum;
+    string public operatorPublicKey;
+    address public factory;
+    address public inisiator;
 
     // mapping of claim indices to all claims hashes
     // when a claim is created, claim hash is stored here,
@@ -49,7 +53,6 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
         address _stakeRegistry,
         address _rewardsCoordinator,
         address _delegationManager
-
     )
         ECDSAServiceManagerBase(
             _avsDirectory,
@@ -57,28 +60,69 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
             _rewardsCoordinator,
             _delegationManager
         )
-    {}
+    {
+        inisiator = msg.sender;
+    }
 
     /* FUNCTIONS */
     // NOTE: this function creates new claim, assigns it a claimId
     function createNewClaim(
         address pool, 
-        address insured
-    ) external returns (Claim memory) {
-        // TOOD :: create validation to allow only if the sender is the registered pool
+        address insured,
+        uint256 amount,
+        uint256 index
+    ) external {
+        // require(IInsuranceFactory(factory).registeredPools(pool) == true, "The pool doesn't registered");
 
         // create a new claim struct
         Claim memory newClaim;
         newClaim.pool = pool;
         newClaim.insured = insured;
+        newClaim.amount = amount;
+        newClaim.index = index;
         newClaim.claimCreatedBlock = uint32(block.number);
 
         // store hash of claim onchain, emit event, and increase claimNum
-        allClaimHashes[latestClaimNum] = keccak256(abi.encode(newClaim));
+        allClaimHashes[latestClaimNum] = keccak256(abi.encode(pool, insured));
         emit NewClaimCreated(latestClaimNum, newClaim);
         latestClaimNum = latestClaimNum + 1;
+    }
 
-        return newClaim;
+    function initialize(address _factory, string calldata _operatorPublicKey) external {
+        // TODO
+        // require(msg.sender == inisiator, "Only inisiator can invoke this function");
+        // require(factory == address(0), "Factory has been set");
+
+        factory = _factory;
+        operatorPublicKey = _operatorPublicKey;
+    }
+    
+    function approveClaimSpending(
+        Claim calldata claim,
+        uint32 referenceClaimIndex,
+        bytes memory signature
+    ) external {
+        // check that the claim is valid, hasn't been responsed yet, and is being responded in time
+        require(
+            keccak256(abi.encode(claim.pool, claim.insured)) == allClaimHashes[referenceClaimIndex],
+            "supplied claim does not match the one recorded in the contract"
+        );
+        require(
+            allClaimResponses[msg.sender][referenceClaimIndex].length == 0,
+            "Operator has already responded to the claim"
+        );
+
+        // The message that was signed
+        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", uint256(referenceClaimIndex).toString()));
+        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
+        bytes4 magicValue = IERC1271Upgradeable.isValidSignature.selector;
+        if (!(magicValue == ECDSAStakeRegistry(stakeRegistry).isValidSignature(ethSignedMessageHash,signature))){
+            revert();
+        }
+
+        IInsurancePool.Claim memory submittedClaim = IInsurancePool.Claim(claim.insured, claim.amount, claim.index, claim.isApproved);
+
+        IInsurancePool(claim.pool).approveClaimSpending(submittedClaim);
     }
 
     function respondToClaim(
@@ -88,7 +132,7 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
     ) external {
         // check that the claim is valid, hasn't been responsed yet, and is being responded in time
         require(
-            keccak256(abi.encode(claim)) == allClaimHashes[referenceClaimIndex],
+            keccak256(abi.encode(claim.pool, claim.insured)) == allClaimHashes[referenceClaimIndex],
             "supplied claim does not match the one recorded in the contract"
         );
         require(
@@ -108,8 +152,8 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
         allClaimResponses[msg.sender][referenceClaimIndex] = signature;
 
         // respond the result to pool
-        // TODO :: Activate this script to respond back to pool
-        // IInsurancePool(claim.pool).respondToClaim(claim, referenceClaimIndex);
+        IInsurancePool.Claim memory submittedClaim = IInsurancePool.Claim(claim.insured, claim.amount, claim.index, claim.isApproved);
+        IInsurancePool(claim.pool).respondToClaim(submittedClaim);
 
         // emitting event
         emit ClaimResponded(referenceClaimIndex, claim, msg.sender);

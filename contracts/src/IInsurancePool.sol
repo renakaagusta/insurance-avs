@@ -1,49 +1,58 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-interface IInsurancePool {
-    // Events
-    event PolicyPurchased(address indexed insured, uint256 amount);
-    event ClaimSubmitted(uint32 indexed claimIndex, Claim claim);
-    event ClaimApproved(uint32 indexed claimIndex, Claim claim);
-    event ClaimRejected(uint32 indexed claimIndex, Claim claim);
-    event Deposit(address indexed depositor, uint256 amount);
-    event Withdraw(uint256 amount);
-    event TransferInsurer(address indexed from, address indexed to);
-    event Stake(uint256 amount);
-    event YieldUpdated(uint256 totalAsset, uint256 yield);
+// Import the ERC20 interface if not already included
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-    // Structs
+interface IInsurancePool is IERC20 {
+    // Struct Definitions
     struct Claim {
         address insured;
         uint256 amount;
+        uint256 index;
         bool isApproved;
     }
 
-    // View Functions
+    // Getter Functions for Public Variables
     function insurer() external view returns (address);
-    function uri() external view returns (string memory);
+    function descriptionUri() external view returns (string memory);
+    function url() external view returns (string memory);
+    function encryptedUrlToken() external view returns (string memory);
+    function encryptedApplicationID() external view returns (string memory);
+    function encryptedApplicationSecret() external view returns (string memory);
+    function checkingLogic() external view returns (string memory);
+    function pathToValue() external view returns (string memory);
+    function approvedValue() external view returns (string memory);
     function coverageAmount() external view returns (uint256);
     function startedAt() external view returns (uint256);
     function finishedAt() external view returns (uint256);
     function endOfPurchaseAt() external view returns (uint256);
     function maxPolicies() external view returns (uint256);
     function totalMintPolicies() external view returns (uint256);
-    function triggeredValue() external view returns (uint256);
     function latestClaimNum() external view returns (uint32);
-    function previewDepositInUSDe(uint256 assetsInUSDe) external view returns (uint256);
-    function previewMintInUSDe(uint256 shares) external view returns (uint256);
 
-    // External Functions
-    function getSubmittedClaims() external returns (uint256);
+    // External/Public Function Signatures
+    function getSubmittedClaimsLength() external view returns(uint256);
+    function getSubmittedClaim(uint256 claimIndex) external view returns(Claim memory);
     function purchasePolicy(uint256 shares, uint256 assetsInUSDe, address insured) external;
     function submitClaim() external;
-    function respondToClaim(
-        Claim calldata claim,
-        uint32 referenceClaimIndex
-    ) external;
+    function approveClaimSpending(Claim calldata claim) external;
+    function respondToClaim(Claim calldata claim) external;
     function withdraw() external;
     function transferInsurer(address _insurer) external;
     function initialDeposit() external;
+    function previewDepositInUSDe(uint256 assetsInUSDe) external view returns (uint256);
+    function previewMintInUSDe(uint256 shares) external view returns (uint256);
     function updateYield() external;
+
+    // Events
+    event PolicyPurchased(address indexed insured, uint256 shares);
+    event ClaimSubmitted(uint32 claimNum, Claim claim);
+    event ClaimApproved(uint256 indexed claimIndex, Claim claim);
+    event ClaimRejected(uint256 indexed claimIndex, Claim claim);
+    event Withdraw(uint256 withdrawAmount);
+    event TransferInsurer(address indexed oldInsurer, address indexed newInsurer);
+    event Deposit(address indexed from, uint256 amount);
+    event Stake(uint256 amount);
+    event YieldUpdated(uint256 totalAssetInUSDe, uint256 yield);
 }

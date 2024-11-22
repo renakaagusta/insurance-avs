@@ -43,6 +43,8 @@ contract SetupPaymentsLibTest is Test, TestConstants, InsuranceClaimManagerSetup
     
     function setUp() public override virtual {
         proxyAdmin = UpgradeableProxyLib.deployProxyAdmin();
+        operatorPublicKey = vm.envString("PUBLIC_KEY");
+
         coreConfigData =
            CoreDeploymentLib.readDeploymentConfigValues("test/mockData/config/core/", 1337); // TODO: Fix this to correct path
         coreDeployment = CoreDeploymentLib.deployContracts(proxyAdmin, coreConfigData);

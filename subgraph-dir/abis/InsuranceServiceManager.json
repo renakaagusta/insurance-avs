@@ -2,11 +2,7 @@
   {
     "type": "constructor",
     "inputs": [
-      {
-        "name": "_avsDirectory",
-        "type": "address",
-        "internalType": "address"
-      },
+      { "name": "_avsDirectory", "type": "address", "internalType": "address" },
       {
         "name": "_stakeRegistry",
         "type": "address",
@@ -28,44 +24,18 @@
   {
     "type": "function",
     "name": "allClaimHashes",
-    "inputs": [
-      {
-        "name": "",
-        "type": "uint32",
-        "internalType": "uint32"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
+    "inputs": [{ "name": "", "type": "uint32", "internalType": "uint32" }],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "allClaimResponses",
     "inputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "",
-        "type": "uint32",
-        "internalType": "uint32"
-      }
+      { "name": "", "type": "address", "internalType": "address" },
+      { "name": "", "type": "uint32", "internalType": "uint32" }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "bytes", "internalType": "bytes" }],
     "stateMutability": "view"
   },
   {
@@ -77,36 +47,16 @@
         "type": "tuple",
         "internalType": "struct IInsuranceServiceManager.Claim",
         "components": [
-          {
-            "name": "pool",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "insured",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "index",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
+          { "name": "pool", "type": "address", "internalType": "address" },
+          { "name": "insured", "type": "address", "internalType": "address" },
+          { "name": "amount", "type": "uint256", "internalType": "uint256" },
+          { "name": "index", "type": "uint256", "internalType": "uint256" },
           {
             "name": "claimCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
           },
-          {
-            "name": "isApproved",
-            "type": "bool",
-            "internalType": "bool"
-          }
+          { "name": "isApproved", "type": "bool", "internalType": "bool" }
         ]
       },
       {
@@ -114,11 +64,7 @@
         "type": "uint32",
         "internalType": "uint32"
       },
-      {
-        "name": "signature",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
+      { "name": "signature", "type": "bytes", "internalType": "bytes" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -127,13 +73,7 @@
     "type": "function",
     "name": "avsDirectory",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
@@ -167,21 +107,13 @@
             "type": "address",
             "internalType": "contract IERC20"
           },
-          {
-            "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
+          { "name": "amount", "type": "uint256", "internalType": "uint256" },
           {
             "name": "startTimestamp",
             "type": "uint32",
             "internalType": "uint32"
           },
-          {
-            "name": "duration",
-            "type": "uint32",
-            "internalType": "uint32"
-          }
+          { "name": "duration", "type": "uint32", "internalType": "uint32" }
         ]
       }
     ],
@@ -192,26 +124,10 @@
     "type": "function",
     "name": "createNewClaim",
     "inputs": [
-      {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "insured",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "index",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "pool", "type": "address", "internalType": "address" },
+      { "name": "insured", "type": "address", "internalType": "address" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" },
+      { "name": "index", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -220,11 +136,7 @@
     "type": "function",
     "name": "deregisterOperatorFromAVS",
     "inputs": [
-      {
-        "name": "operator",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "operator", "type": "address", "internalType": "address" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -233,31 +145,17 @@
     "type": "function",
     "name": "factory",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "getOperatorRestakedStrategies",
     "inputs": [
-      {
-        "name": "_operator",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "_operator", "type": "address", "internalType": "address" }
     ],
     "outputs": [
-      {
-        "name": "",
-        "type": "address[]",
-        "internalType": "address[]"
-      }
+      { "name": "", "type": "address[]", "internalType": "address[]" }
     ],
     "stateMutability": "view"
   },
@@ -266,11 +164,7 @@
     "name": "getRestakeableStrategies",
     "inputs": [],
     "outputs": [
-      {
-        "name": "",
-        "type": "address[]",
-        "internalType": "address[]"
-      }
+      { "name": "", "type": "address[]", "internalType": "address[]" }
     ],
     "stateMutability": "view"
   },
@@ -278,24 +172,14 @@
     "type": "function",
     "name": "inisiator",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "initialize",
     "inputs": [
-      {
-        "name": "_factory",
-        "type": "address",
-        "internalType": "address"
-      },
+      { "name": "_factory", "type": "address", "internalType": "address" },
       {
         "name": "_operatorPublicKey",
         "type": "string",
@@ -309,94 +193,46 @@
     "type": "function",
     "name": "latestClaimNum",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint32",
-        "internalType": "uint32"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "uint32", "internalType": "uint32" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "mergeAddresses",
     "inputs": [
-      {
-        "name": "_addr1",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_addr2",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "_addr1", "type": "address", "internalType": "address" },
+      { "name": "_addr2", "type": "address", "internalType": "address" }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
     "stateMutability": "pure"
   },
   {
     "type": "function",
     "name": "operatorPublicKey",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "owner",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "registerOperatorToAVS",
     "inputs": [
-      {
-        "name": "operator",
-        "type": "address",
-        "internalType": "address"
-      },
+      { "name": "operator", "type": "address", "internalType": "address" },
       {
         "name": "operatorSignature",
         "type": "tuple",
         "internalType": "struct ISignatureUtils.SignatureWithSaltAndExpiry",
         "components": [
-          {
-            "name": "signature",
-            "type": "bytes",
-            "internalType": "bytes"
-          },
-          {
-            "name": "salt",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "expiry",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
+          { "name": "signature", "type": "bytes", "internalType": "bytes" },
+          { "name": "salt", "type": "bytes32", "internalType": "bytes32" },
+          { "name": "expiry", "type": "uint256", "internalType": "uint256" }
         ]
       }
     ],
@@ -419,36 +255,16 @@
         "type": "tuple",
         "internalType": "struct IInsuranceServiceManager.Claim",
         "components": [
-          {
-            "name": "pool",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "insured",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "index",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
+          { "name": "pool", "type": "address", "internalType": "address" },
+          { "name": "insured", "type": "address", "internalType": "address" },
+          { "name": "amount", "type": "uint256", "internalType": "uint256" },
+          { "name": "index", "type": "uint256", "internalType": "uint256" },
           {
             "name": "claimCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
           },
-          {
-            "name": "isApproved",
-            "type": "bool",
-            "internalType": "bool"
-          }
+          { "name": "isApproved", "type": "bool", "internalType": "bool" }
         ]
       },
       {
@@ -456,11 +272,7 @@
         "type": "uint32",
         "internalType": "uint32"
       },
-      {
-        "name": "signature",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
+      { "name": "signature", "type": "bytes", "internalType": "bytes" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -469,13 +281,7 @@
     "type": "function",
     "name": "rewardsInitiator",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
@@ -495,24 +301,14 @@
     "type": "function",
     "name": "stakeRegistry",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "transferOwnership",
     "inputs": [
-      {
-        "name": "newOwner",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "newOwner", "type": "address", "internalType": "address" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -521,11 +317,7 @@
     "type": "function",
     "name": "updateAVSMetadataURI",
     "inputs": [
-      {
-        "name": "_metadataURI",
-        "type": "string",
-        "internalType": "string"
-      }
+      { "name": "_metadataURI", "type": "string", "internalType": "string" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -546,36 +338,16 @@
         "indexed": false,
         "internalType": "struct IInsuranceServiceManager.Claim",
         "components": [
-          {
-            "name": "pool",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "insured",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "index",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
+          { "name": "pool", "type": "address", "internalType": "address" },
+          { "name": "insured", "type": "address", "internalType": "address" },
+          { "name": "amount", "type": "uint256", "internalType": "uint256" },
+          { "name": "index", "type": "uint256", "internalType": "uint256" },
           {
             "name": "claimCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
           },
-          {
-            "name": "isApproved",
-            "type": "bool",
-            "internalType": "bool"
-          }
+          { "name": "isApproved", "type": "bool", "internalType": "bool" }
         ]
       },
       {
@@ -616,36 +388,16 @@
         "indexed": false,
         "internalType": "struct IInsuranceServiceManager.Claim",
         "components": [
-          {
-            "name": "pool",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "insured",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "index",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
+          { "name": "pool", "type": "address", "internalType": "address" },
+          { "name": "insured", "type": "address", "internalType": "address" },
+          { "name": "amount", "type": "uint256", "internalType": "uint256" },
+          { "name": "index", "type": "uint256", "internalType": "uint256" },
           {
             "name": "claimCreatedBlock",
             "type": "uint32",
             "internalType": "uint32"
           },
-          {
-            "name": "isApproved",
-            "type": "bool",
-            "internalType": "bool"
-          }
+          { "name": "isApproved", "type": "bool", "internalType": "bool" }
         ]
       }
     ],

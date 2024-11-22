@@ -10,7 +10,7 @@ use rand::Rng;
 use std::{env, str::FromStr};
 use tokio::time::{self, Duration};
 
-pub const ANVIL_RPC_URL: &str = "http://localhost:8545";
+pub const ANVIL_RPC_URL: &str = "https://eth.renakaagusta.dev";
 
 #[allow(unused)]
 static KEY: Lazy<String> =
@@ -34,7 +34,7 @@ fn generate_random_name() -> String {
 #[allow(unused)]
 /// Calls CreateNewTask function of the Insurance world service manager contract
 async fn create_new_task(task_name: &str) -> Result<()> {
-    let data = std::fs::read_to_string("contracts/deployments/insurance/31337.json")?;
+    let data = std::fs::read_to_string("contracts/deployments/insurance/1.json")?;
     let parsed: InsuranceData = serde_json::from_str(&data)?;
     let insurance_contract_address: Address =
         parsed.addresses.insurance_service_manager.parse()?;

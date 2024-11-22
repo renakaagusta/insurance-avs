@@ -1,5 +1,10 @@
 import { ethers } from "ethers";
 import * as dotenv from "dotenv";
+import { ReclaimClient } from '@reclaimprotocol/zk-fetch';
+import * as Reclaim from "@reclaimprotocol/js-sdk";
+import { hexToBytes, toHex } from "ethereum-cryptography/utils.js";
+import { decrypt } from "eciesjs";
+
 const fs = require('fs');
 const path = require('path');
 dotenv.config();
@@ -13,7 +18,7 @@ if (!Object.keys(process.env).length) {
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 /// TODO: Hack
-let chainId = 31337;
+let chainId = 1;
 
 const avsDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../contracts/deployments/insurance/${chainId}.json`), 'utf8'));
 // Load core deployment data
@@ -29,6 +34,7 @@ const delegationManagerABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, 
 const ecdsaRegistryABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../abis/ECDSAStakeRegistry.json'), 'utf8'));
 const insuranceServiceManagerABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../abis/InsuranceServiceManager.json'), 'utf8'));
 const avsDirectoryABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../abis/IAVSDirectory.json'), 'utf8'));
+const insurancePoolABI = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../abis/IInsurancePool.json'), 'utf8'));
 
 // Initialize contract objects from ABIs
 const delegationManager = new ethers.Contract(delegationManagerAddress, delegationManagerABI, wallet);
@@ -36,7 +42,7 @@ const insuranceServiceManager = new ethers.Contract(insuranceServiceManagerAddre
 const ecdsaRegistryContract = new ethers.Contract(ecdsaStakeRegistryAddress, ecdsaRegistryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
 
-const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: number, pool: string, insured: string) => {
+const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: number, pool: string, insured: string, amount: number, index: number) => {
     try {
         const message = `Insurance, ${claimIndex}`;
         const messageHash = ethers.solidityPackedKeccak256(["string"], [message]);
@@ -52,21 +58,97 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
             [operators, signatures, ethers.toBigInt(await provider.getBlockNumber() - 1)]
         );
 
+        const insurancePool = new ethers.Contract(pool, insurancePoolABI, wallet);
+
+        // Private key and derived bytes
+        const privateKeyInHex = process.env.PRIVATE_KEY ?? '';
+
+        const privateKeyInBytes = hexToBytes(privateKeyInHex);
+
+        // Insurance pool variables
+        const url = await insurancePool.url();
+
+        const encryptedUrlToken = await insurancePool.encryptedUrlToken();
+        const regex = await insurancePool.regexValue();
+        const encryptedApplicationID = await insurancePool.encryptedApplicationID();
+        const encryptedApplicationSecret = await insurancePool.encryptedApplicationSecret();
+        const checkingLogic = await insurancePool.checkingLogic();
+        const approvedValue = await insurancePool.approvedValue();
+
+        // Decryption results
+        const decryptedUrlToken = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedUrlToken, "hex"))).toString();
+        const decryptedApplicationID = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedApplicationID, "hex"))).toString();
+        const decryptedApplicationSecret = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedApplicationSecret, "hex"))).toString();
+
         let isApproved = false;
 
-        if (Math.random() * 10 % 2 == 0) {
-            isApproved = true;
-        } else {
+        try {
+            const reclaimClient = new ReclaimClient(decryptedApplicationID, decryptedApplicationSecret);
+
+            const proof = await reclaimClient.zkFetch(url.replace("$TOKEN", decryptedUrlToken), {
+                method: 'GET',
+            }, {
+                responseMatches: [
+                    {
+                        "type": "regex",
+                        "value": regex
+                    }
+                ],
+            });
+
+            if (!proof) {
+                isApproved = false;
+            } else {
+                const isValid = await Reclaim.verifyProof(proof);
+                if (!isValid) {
+                    isApproved = false;
+                    return;
+                }
+
+                const proofData = await Reclaim.transformForOnchain(proof);
+
+                switch (checkingLogic) {
+                    case "==":
+                        isApproved = proof.extractedParameterValues['value'] == approvedValue;
+                        break;
+                    case "!=":
+                        isApproved = proof.extractedParameterValues['value'] != approvedValue;
+                        break;
+                    case ">=":
+                        isApproved = proof.extractedParameterValues['value'] >= Number(approvedValue);
+                        break;
+                    case ">":
+                        isApproved = Number(String(proof.extractedParameterValues['value'])) > Number(approvedValue);
+                        break;
+                    case "<=":
+                        isApproved = proof.extractedParameterValues['value'] <= Number(approvedValue);
+                        break;
+                    case "<":
+                        isApproved = proof.extractedParameterValues['value'] < Number(approvedValue);
+                        break;
+                }
+            }
+        } catch (e) {
+            console.log(e);
             isApproved = false;
         }
 
-        const tx = await insuranceServiceManager.respondToClaim(
-            { pool: pool, insured: insured, isApproved: isApproved, claimCreatedBlock: claimCreatedBlock },
+        if (isApproved) {
+            const txApproveClaimSpending = await insuranceServiceManager.approveClaimSpending(
+                { pool: pool, insured: insured, amount: amount, index: index, isApproved: isApproved, claimCreatedBlock: claimCreatedBlock },
+                claimIndex,
+                signedClaim
+            );
+            await txApproveClaimSpending.wait();
+        }
+
+        const txRespondToClaim = await insuranceServiceManager.respondToClaim(
+            { pool: pool, insured: insured, amount: amount, index: index, isApproved: isApproved, claimCreatedBlock: claimCreatedBlock },
             claimIndex,
             signedClaim
         );
-        await tx.wait();
-        console.log(`Responded to claim.`);
+        await txRespondToClaim.wait();
+        console.log(`Responded to claim, isApproved: ${isApproved}`);
     } catch (e) {
         console.log('error', e)
     }
@@ -130,9 +212,15 @@ const monitorNewClaims = async () => {
     //console.log(`Creating new claim "EigenWorld"`);
     //await insuranceServiceManager.createNewClaim("EigenWorld");
 
+    console.log('service manager address: ', await insuranceServiceManager.getAddress())
+
     insuranceServiceManager.on("NewClaimCreated", async (claimIndex: number, claim: any) => {
-        console.log(`New claim detected: Insurance, ${claim.pool} ${claim.insured}`);
-        await signAndRespondToClaim(claimIndex, claim.claimCreatedBlock, claim.pool, claim.insured);
+        try {
+            console.log(`New claim detected: Insurance, ${claim.pool} ${claim.insured} ${claim.amount} ${claim.index}`);
+            await signAndRespondToClaim(claimIndex, claim.claimCreatedBlock, claim.pool, claim.insured, claim.amount, claim.index);
+        } catch(e) {
+            console.log('ERROR MONITORING', e)
+        }
     });
 
     console.log("Monitoring for new claims...");

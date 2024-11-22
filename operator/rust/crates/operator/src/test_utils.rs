@@ -32,7 +32,7 @@ use tokio::time::{self, Duration};
 
 use insurance_utils::ecdsastakeregistry::ECDSAStakeRegistry;
 
-pub const ANVIL_RPC_URL: &str = "http://localhost:8545";
+pub const ANVIL_RPC_URL: &str = "https://eth.renakaagusta.dev";
 
 static KEY: Lazy<String> =
     Lazy::new(|| env::var("PRIVATE_KEY").expect("failed to retrieve private key"));
@@ -62,7 +62,7 @@ async fn sign_and_response_to_task(
     println!("Signing and responding to task : {:?}", task_index);
 
     let insurance_contract_address: Address =
-        parse_insurance_service_manager("contracts/deployments/insurance/31337.json")?;
+        parse_insurance_service_manager("contracts/deployments/insurance/1.json")?;
     let insurance_contract = InsuranceServiceManager::new(insurance_contract_address, &pr);
 
     let response_hash = insurance_contract
@@ -90,7 +90,7 @@ async fn monitor_new_tasks() -> Result<()> {
     let pr = get_signer(&KEY.clone(), ANVIL_RPC_URL);
     let signer = PrivateKeySigner::from_str(&KEY.clone())?;
     let insurance_contract_address: Address =
-        parse_insurance_service_manager("contracts/deployments/insurance/31337.json")?;
+        parse_insurance_service_manager("contracts/deployments/insurance/1.json")?;
 
     let mut latest_processed_block = pr.get_block_number().await?;
 
@@ -138,9 +138,9 @@ async fn register_operator() -> Result<()> {
     let default_strategy = Address::ZERO; // We don't need strategy for our example.
 
     let delegation_manager_address =
-        parse_delegation_manager_address("contracts/deployments/core/31337.json")?;
+        parse_delegation_manager_address("contracts/deployments/core/1.json")?;
     let avs_directory_address: Address =
-        parse_avs_directory_address("contracts/deployments/core/31337.json")?;
+        parse_avs_directory_address("contracts/deployments/core/1.json")?;
 
     let elcontracts_reader_instance = ELChainReader::new(
         get_logger().clone(),
@@ -187,7 +187,7 @@ async fn register_operator() -> Result<()> {
     let expiry: U256 = U256::from(now + 3600);
 
     let insurance_contract_address: Address =
-        parse_insurance_service_manager("contracts/deployments/insurance/31337.json")?;
+        parse_insurance_service_manager("contracts/deployments/insurance/1.json")?;
     let digest_hash = elcontracts_reader_instance
         .calculate_operator_avs_registration_digest_hash(
             signer.address(),
@@ -204,7 +204,7 @@ async fn register_operator() -> Result<()> {
         expiry: expiry,
     };
     let stake_registry_address: Address =
-        parse_stake_registry_address("contracts/deployments/insurance/31337.json")?;
+        parse_stake_registry_address("contracts/deployments/insurance/1.json")?;
     let contract_ecdsa_stake_registry = ECDSAStakeRegistry::new(stake_registry_address, &pr);
     let registeroperator_details_call: alloy::contract::CallBuilder<
         _,
@@ -260,7 +260,7 @@ async fn create_new_task(task_name: &str) -> Result<()> {
     }
 
     let s = &format!(
-        "{}/contracts/deployments/insurance/31337.json",
+        "{}/contracts/deployments/insurance/1.json",
         &path.display()
     );
     let parsed: InsuranceData =
@@ -335,7 +335,7 @@ mod tests {
                 .expect("Reached the filesystem root, no more parent directories");
         }
 
-        let s = &format!("{}/contracts/deployments/core/31337.json", &path.display());
+        let s = &format!("{}/contracts/deployments/core/1.json", &path.display());
         let el_parsed: EigenLayerData =
             serde_json::from_str(&std::fs::read_to_string(s).unwrap()).unwrap();
         let delegation_manager_address: Address = el_parsed.addresses.delegation.parse().unwrap();
@@ -368,7 +368,7 @@ mod tests {
         }
 
         let s = &format!(
-            "{}/contracts/deployments/insurance/31337.json",
+            "{}/contracts/deployments/insurance/1.json",
             &path.display()
         );
         let data = std::fs::read_to_string(s).unwrap();

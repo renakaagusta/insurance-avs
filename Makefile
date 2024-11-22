@@ -7,7 +7,7 @@ help:
 AGGREGATOR_ECDSA_PRIV_KEY=0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
 CHALLENGER_ECDSA_PRIV_KEY=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
 
-CHAINID=31337
+CHAINID=1
 # Make sure to update this if the strategy address changes
 # check in contracts/script/output/${CHAINID}/insurance_avs_deployment_output.json
 STRATEGY_ADDRESS=0x7a2088a1bFc9d81c55368AE168C2C02570cB814F

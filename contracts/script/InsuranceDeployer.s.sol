@@ -31,10 +31,12 @@ contract InsuranceDeployer is Script {
     InsuranceDeploymentLib.DeploymentData insuranceDeployment;
     Quorum internal quorum;
     ERC20Mock token;
+    string operatorPublicKey;
+
     function setUp() public virtual {
         deployer = vm.rememberKey(vm.envUint("PRIVATE_KEY"));
         vm.label(deployer, "Deployer");
-
+        
         coreDeployment = CoreDeploymentLib.readDeploymentJson("deployments/core/", block.chainid);
        
         token = new ERC20Mock();

@@ -6,9 +6,9 @@ dotenv.config();
 
 // Setup env variables
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+const wallet = new ethers.Wallet(process.env.PRIVATE_KEY_2!, provider);
 /// TODO: Hack
-let chainId = 31337;
+let chainId = 1;
 
 const avsDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../contracts/deployments/insurance/${chainId}.json`), 'utf8'));
 const insuranceServiceManagerAddress = avsDeploymentData.addresses.insuranceServiceManager;
@@ -25,10 +25,10 @@ function generateRandomAddress() {
   return address;
 }
 
-async function createNewClaim(pool: string, insured: string) {
+async function createNewClaim(pool: string, insured: string, amount: number, index: number) {
   try {
     // Send a transaction to the createNewClaim function
-    const tx = await insuranceServiceManager.createNewClaim(pool, insured);
+    const tx = await insuranceServiceManager.createNewClaim(pool, insured, amount, index);
 
     // Wait for the transaction to be mined
     const receipt = await tx.wait();
@@ -42,10 +42,15 @@ async function createNewClaim(pool: string, insured: string) {
 // Function to create a new claim with a random name every 15 seconds
 function startCreatingClaims() {
   setInterval(() => {
-    const pool = generateRandomAddress();
-    const insured = generateRandomAddress();
-    console.log(`Creating new claim with pool: ${pool}, insured: ${insured}`);
-    createNewClaim(pool, insured);
+    // const pool = generateRandomAddress();
+    // const insured = generateRandomAddress();
+    // const amount = 1e6;
+    const pool = "0x4de030b5f6b86a2b875953D919238e9AA3C2F506";
+    const insured = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+    const amount = 40000000;
+    const index = 0;
+    console.log(`Creating new claim with pool: ${pool}, insured: ${insured}, amount: ${amount}`);
+    createNewClaim(pool, insured, amount, index);
   }, 10000);
 }
 
