@@ -95,6 +95,8 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
 
         factory = _factory;
         operatorPublicKey = _operatorPublicKey;
+
+        emit Initialize(factory, operatorPublicKey);
     }
     
     function approveClaimSpending(

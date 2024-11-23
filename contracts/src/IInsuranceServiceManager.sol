@@ -11,6 +11,11 @@ interface IInsuranceServiceManager {
         bool isApproved;
     }
 
+    event Initialize(
+        address factory,
+        string operatorPublicKey
+    );
+
     event NewClaimCreated(
         uint32 indexed claimIndex, 
         Claim claim
