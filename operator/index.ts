@@ -162,6 +162,8 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
 };
 
 const registerOperator = async () => {
+    console.log('Operator wallet address: ', await wallet.getAddress())
+
     // Registers as an Operator in EigenLayer.
     try {
         const tx1 = await delegationManager.registerAsOperator({

@@ -1,8 +1,0 @@
-{
-  "arbitrum-sepolia": {
-    "TransparentUpgradeableProxy": {
-      "address": "0x68E88641112278fACeB6A0e3c679A300951EB928",
-      "startBlock": 99781751
-    }
-  }
-}
