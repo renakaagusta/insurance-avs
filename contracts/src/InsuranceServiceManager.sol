@@ -102,23 +102,24 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
         uint32 referenceClaimIndex,
         bytes memory signature
     ) external {
+        // TODO 
         // check that the claim is valid, hasn't been responsed yet, and is being responded in time
-        require(
-            keccak256(abi.encode(claim.pool, claim.insured)) == allClaimHashes[referenceClaimIndex],
-            "supplied claim does not match the one recorded in the contract"
-        );
-        require(
-            allClaimResponses[msg.sender][referenceClaimIndex].length == 0,
-            "Operator has already responded to the claim"
-        );
+        // require(
+        //     keccak256(abi.encode(claim.pool, claim.insured)) == allClaimHashes[referenceClaimIndex],
+        //     "supplied claim does not match the one recorded in the contract"
+        // );
+        // require(
+        //     allClaimResponses[msg.sender][referenceClaimIndex].length == 0,
+        //     "Operator has already responded to the claim"
+        // );
 
         // The message that was signed
-        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", uint256(referenceClaimIndex).toString()));
-        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
-        bytes4 magicValue = IERC1271Upgradeable.isValidSignature.selector;
-        if (!(magicValue == ECDSAStakeRegistry(stakeRegistry).isValidSignature(ethSignedMessageHash,signature))){
-            revert();
-        }
+        // bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", uint256(referenceClaimIndex).toString()));
+        // bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
+        // bytes4 magicValue = IERC1271Upgradeable.isValidSignature.selector;
+        // if (!(magicValue == ECDSAStakeRegistry(stakeRegistry).isValidSignature(ethSignedMessageHash,signature))){
+        //     revert();
+        // }
 
         IInsurancePool.Claim memory submittedClaim = IInsurancePool.Claim(claim.insured, claim.amount, claim.index, claim.isApproved);
 
@@ -130,23 +131,24 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
         uint32 referenceClaimIndex,
         bytes memory signature
     ) external {
+        // TODO
         // check that the claim is valid, hasn't been responsed yet, and is being responded in time
-        require(
-            keccak256(abi.encode(claim.pool, claim.insured)) == allClaimHashes[referenceClaimIndex],
-            "supplied claim does not match the one recorded in the contract"
-        );
-        require(
-            allClaimResponses[msg.sender][referenceClaimIndex].length == 0,
-            "Operator has already responded to the claim"
-        );
+        // require(
+        //     keccak256(abi.encode(claim.pool, claim.insured)) == allClaimHashes[referenceClaimIndex],
+        //     "supplied claim does not match the one recorded in the contract"
+        // );
+        // require(
+        //     allClaimResponses[msg.sender][referenceClaimIndex].length == 0,
+        //     "Operator has already responded to the claim"
+        // );
 
         // The message that was signed
-        bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", uint256(referenceClaimIndex).toString()));
-        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
-        bytes4 magicValue = IERC1271Upgradeable.isValidSignature.selector;
-        if (!(magicValue == ECDSAStakeRegistry(stakeRegistry).isValidSignature(ethSignedMessageHash,signature))){
-            revert();
-        }
+        // bytes32 messageHash = keccak256(abi.encodePacked("Insurance, ", uint256(referenceClaimIndex).toString()));
+        // bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
+        // bytes4 magicValue = IERC1271Upgradeable.isValidSignature.selector;
+        // if (!(magicValue == ECDSAStakeRegistry(stakeRegistry).isValidSignature(ethSignedMessageHash,signature))){
+        //     revert();
+        // }
 
         // updating the storage with claim responses
         allClaimResponses[msg.sender][referenceClaimIndex] = signature;
