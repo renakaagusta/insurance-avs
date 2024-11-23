@@ -6,62 +6,62 @@ import { hexToBytes, toHex } from "ethereum-cryptography/utils.js";
 
 dotenv.config();
 
-// function getAddress(publicKey: Uint8Array) {
-//   const slicedPublicKey = publicKey.slice(1)
-//   const hash = keccak256(slicedPublicKey)
-//   return hash.slice(-20)
-// }
+function getAddress(publicKey: Uint8Array) {
+  const slicedPublicKey = publicKey.slice(1)
+  const hash = keccak256(slicedPublicKey)
+  return hash.slice(-20)
+}
 
-// console.log(process.env)
-// console.log((process.env.PRIVATE_KEY ?? '0x').slice(2));
+console.log(process.env)
+console.log((process.env.PRIVATE_KEY ?? '0x').slice(2));
 
-// const privatekey = hexToBytes(process.env.PRIVATE_KEY ?? '0x'.slice(2));
+const privatekey = hexToBytes(process.env.PRIVATE_KEY ?? '0x'.slice(2));
 
-// console.log("privateKey: ", toHex(privatekey))
+console.log("privateKey: ", toHex(privatekey))
 
-// const publicKey = secp.getPublicKey(privatekey)
+const publicKey = secp.getPublicKey(privatekey)
 
-// console.log("publicKey: ", toHex(publicKey))
+console.log("publicKey: ", toHex(publicKey))
 
-// const address = getAddress(publicKey);
+const address = getAddress(publicKey);
 
-// console.log("address: ", address)
+console.log("address: ", address)
 
-// const applicationID = Buffer.from(process.env.APPLICATION_ID ?? '')
+const applicationID = Buffer.from(process.env.APPLICATION_ID ?? '')
 
-// console.log('applicationID:', applicationID)
+console.log('applicationID:', applicationID)
 
-// const applicationSecret = Buffer.from(process.env.APPLICATION_SECRET ?? '')
+const applicationSecret = Buffer.from(process.env.APPLICATION_SECRET ?? '')
 
-// console.log("applicationSecret: ", applicationSecret)
+console.log("applicationSecret: ", applicationSecret)
 
-// const urlToken = Buffer.from(process.env.URL_TOKEN ?? '')
+const urlToken = Buffer.from(process.env.URL_TOKEN ?? '')
 
-// console.log("urlToken: ", urlToken)
+console.log("urlToken: ", urlToken)
 
-// const encryptedApplicationID = encrypt(publicKey, applicationID)
+const encryptedApplicationID = encrypt(publicKey, applicationID)
 
-// console.log("enryptedApplicationID: ", Buffer.from(encryptedApplicationID).toString('hex'))
+console.log("enryptedApplicationID: ", Buffer.from(encryptedApplicationID).toString('hex'))
 
-// const encryptedApplicationSecret = encrypt(publicKey, applicationSecret)
+const encryptedApplicationSecret = encrypt(publicKey, applicationSecret)
 
-// console.log("encryptedApplicationSecret: ", Buffer.from(encryptedApplicationSecret).toString('hex'))
+console.log("encryptedApplicationSecret: ", Buffer.from(encryptedApplicationSecret).toString('hex'))
 
-// const encryptedUrlToken = encrypt(publicKey, urlToken)
+const encryptedUrlToken = encrypt(publicKey, urlToken)
 
-// console.log("encryptedUrlToken: ", Buffer.from(encryptedUrlToken).toString('hex'))
-
-
-const privateKeyInHex = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-console.log("Private Key (Hex):", privateKeyInHex);
+console.log("encryptedUrlToken: ", Buffer.from(encryptedUrlToken).toString('hex'))
 
 
-const privateKeyInBytes = hexToBytes(privateKeyInHex);
-console.log("Private Key (Bytes):", privateKeyInBytes);
+// const privateKeyInHex = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+// console.log("Private Key (Hex):", privateKeyInHex);
 
 
-const encryptedUrlToken = "045b90af840ef9a8197685d45187712bc3201347773f5d93ae38711e9b89e44ee1b9841507f64608756fdf55949e9cf604ea345ef2b5dd2441048d764910c85fb9474dc5f8ba03fca011082e5bc4b45d413cbf313a4985e642acab530c065baa442c857c324c6b5235ec1e7df7083d69434832f31ec76fbaad69a6441f56f0390b417f9f9f6bda0f64a06e";
-console.log("Encrypted URL Token:", encryptedUrlToken);
+// const privateKeyInBytes = hexToBytes(privateKeyInHex);
+// console.log("Private Key (Bytes):", privateKeyInBytes);
 
-const decryptedUrlToken = decrypt(privateKeyInBytes, Buffer.from(encryptedUrlToken, "hex"));
-console.log("Decrypted URL Token:", Buffer.from(decryptedUrlToken).toString());
+
+// const encryptedUrlToken = "045b90af840ef9a8197685d45187712bc3201347773f5d93ae38711e9b89e44ee1b9841507f64608756fdf55949e9cf604ea345ef2b5dd2441048d764910c85fb9474dc5f8ba03fca011082e5bc4b45d413cbf313a4985e642acab530c065baa442c857c324c6b5235ec1e7df7083d69434832f31ec76fbaad69a6441f56f0390b417f9f9f6bda0f64a06e";
+// console.log("Encrypted URL Token:", encryptedUrlToken);
+
+// const decryptedUrlToken = decrypt(privateKeyInBytes, Buffer.from(encryptedUrlToken, "hex"));
+// console.log("Decrypted URL Token:", Buffer.from(decryptedUrlToken).toString());

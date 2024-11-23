@@ -32,7 +32,7 @@ use tokio::time::{self, Duration};
 
 use insurance_utils::ecdsastakeregistry::ECDSAStakeRegistry;
 
-pub const ANVIL_RPC_URL: &str = "https://eth.renakaagusta.dev";
+pub const ANVIL_RPC_URL: &str = "https://eth-holesky.g.alchemy.com/v2/jBG4sMyhez7V13jNTeQKfVfgNa54nCmF";
 
 static KEY: Lazy<String> =
     Lazy::new(|| env::var("PRIVATE_KEY").expect("failed to retrieve private key"));

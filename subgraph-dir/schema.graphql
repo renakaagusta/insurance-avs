@@ -1,6 +1,0 @@
-type ExampleEntity @entity {
-  id: Bytes!
-  count: BigInt!
-  claimIndex: BigInt! # uint32
-  claim_pool: Bytes! # address
-}

@@ -1,8 +1,0 @@
-{
-  "mainnet": {
-    "InsuranceServiceManager": {
-      "address": "0x6baf3037bccad54c0d2e3564234aae1db7fe38ea",
-      "startBlock": 0
-    }
-  }
-}

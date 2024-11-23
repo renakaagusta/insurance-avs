@@ -16,9 +16,9 @@ if (!Object.keys(process.env).length) {
 
 // Setup env variables
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+const wallet = new ethers.Wallet(process.env.PRIVATE_KEY || '', provider);
 /// TODO: Hack
-let chainId = 1;
+let chainId = 421614;
 
 const avsDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../contracts/deployments/insurance/${chainId}.json`), 'utf8'));
 // Load core deployment data
@@ -61,7 +61,7 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
         const insurancePool = new ethers.Contract(pool, insurancePoolABI, wallet);
 
         // Private key and derived bytes
-        const privateKeyInHex = process.env.PRIVATE_KEY ?? '';
+        const privateKeyInHex = '0x45d37ea082249aa1349f24663fbcfdc325b4bce530527e929c4356fc925f4f47';
 
         const privateKeyInBytes = hexToBytes(privateKeyInHex);
 
@@ -132,6 +132,13 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
             console.log(e);
             isApproved = false;
         }
+
+        console.log('operator', await wallet.getAddress());
+        console.log('sevice manager', await insuranceServiceManager.getAddress());
+        console.log('pool', pool);
+        console.log('insured', insured);
+        console.log('amount', amount);
+        console.log('index', index)
 
         if (isApproved) {
             const txApproveClaimSpending = await insuranceServiceManager.approveClaimSpending(

@@ -10,7 +10,7 @@ use rand::Rng;
 use std::{env, str::FromStr};
 use tokio::time::{self, Duration};
 
-pub const ANVIL_RPC_URL: &str = "https://eth.renakaagusta.dev";
+pub const ANVIL_RPC_URL: &str = "https://eth-holesky.g.alchemy.com/v2/jBG4sMyhez7V13jNTeQKfVfgNa54nCmF";
 
 #[allow(unused)]
 static KEY: Lazy<String> =
