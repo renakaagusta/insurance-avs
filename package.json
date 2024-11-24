@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@proxymanllc/better-curl-to-json": "^0.2.0",
-    "curlconverter": "^4.11.0",
     "dotenv": "^10.0.0",
     "eciesjs": "^0.4.12",
     "ethereum-cryptography": "^1.1.2",
