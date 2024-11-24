@@ -2,9 +2,10 @@
   "name": "insurance-avs",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start:operator": "ts-node operator/index.ts",
-    "start:traffic": "ts-node operator/createNewTasks.ts",
+    "start:operator": "npx tsx operator/index.ts",
+    "start:traffic": "npx tsx operator/createNewTasks.ts",
     "start:anvil": "anvil",
     "deploy:core": "cd contracts && forge script script/DeployEigenLayerCore.s.sol --rpc-url https://arb-sepolia.g.alchemy.com/v2/jBG4sMyhez7V13jNTeQKfVfgNa54nCmF --broadcast",
     "deploy:insurance": "cd contracts && forge script script/InsuranceDeployer.s.sol --rpc-url https://arb-sepolia.g.alchemy.com/v2/jBG4sMyhez7V13jNTeQKfVfgNa54nCmF --broadcast",
@@ -15,10 +16,11 @@
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest"
   },
   "dependencies": {
+    "curlconverter": "^4.11.0",
     "dotenv": "^10.0.0",
     "eciesjs": "^0.4.12",
-    "ethers": "^6.13.2",
-    "ethereum-cryptography": "^1.1.2"
+    "ethereum-cryptography": "^1.1.2",
+    "ethers": "^6.13.2"
   },
   "devDependencies": {
     "@reclaimprotocol/circom-symmetric-crypto": "^1.1.3",

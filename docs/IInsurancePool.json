@@ -116,7 +116,7 @@
   },
   {
     "type": "function",
-    "name": "checkingLogic",
+    "name": "regexValidation",
     "inputs": [],
     "outputs": [
       {
@@ -381,7 +381,7 @@
   },
   {
     "type": "function",
-    "name": "regexValue",
+    "name": "regexExtraction",
     "inputs": [],
     "outputs": [
       {

@@ -116,19 +116,6 @@
   },
   {
     "type": "function",
-    "name": "checkingLogic",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "coverageAmount",
     "inputs": [],
     "outputs": [
@@ -136,6 +123,19 @@
         "name": "",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "curl",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
       }
     ],
     "stateMutability": "view"
@@ -181,7 +181,7 @@
   },
   {
     "type": "function",
-    "name": "encryptedUrlToken",
+    "name": "encryptedCurlSecretKey",
     "inputs": [],
     "outputs": [
       {
@@ -381,7 +381,20 @@
   },
   {
     "type": "function",
-    "name": "regexValue",
+    "name": "regexExtraction",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "regexValidation",
     "inputs": [],
     "outputs": [
       {
@@ -545,19 +558,6 @@
     "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "url",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",

@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 import * as dotenv from "dotenv";
-const fs = require('fs');
-const path = require('path');
+import fs from "fs";
+import path from "path";
+
 dotenv.config();
 
 // Setup env variables

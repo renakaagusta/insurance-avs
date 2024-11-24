@@ -20,7 +20,7 @@ interface IInsurancePool is IERC20 {
     function encryptedUrlToken() external view returns (string memory);
     function encryptedApplicationID() external view returns (string memory);
     function encryptedApplicationSecret() external view returns (string memory);
-    function checkingLogic() external view returns (string memory);
+    function regexValidation() external view returns (string memory);
     function pathToValue() external view returns (string memory);
     function approvedValue() external view returns (string memory);
     function coverageAmount() external view returns (uint256);

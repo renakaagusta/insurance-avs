@@ -4,9 +4,14 @@ import { ReclaimClient } from '@reclaimprotocol/zk-fetch';
 import * as Reclaim from "@reclaimprotocol/js-sdk";
 import { hexToBytes, toHex } from "ethereum-cryptography/utils.js";
 import { decrypt } from "eciesjs";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
+import * as curlConverter from 'curlconverter'
 
-const fs = require('fs');
-const path = require('path');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 
 // Check if the process.env object is empty
@@ -66,32 +71,34 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
         const privateKeyInBytes = hexToBytes(privateKeyInHex);
 
         // Insurance pool variables
-        const url = await insurancePool.url();
-
-        const encryptedUrlToken = await insurancePool.encryptedUrlToken();
-        const regex = await insurancePool.regexValue();
+        const curl = await insurancePool.curl();
+        const encryptedCurlSecretKey = await insurancePool.encryptedCurlSecretKey();
+        const regexExtraction = await insurancePool.regexExtraction();
         const encryptedApplicationID = await insurancePool.encryptedApplicationID();
         const encryptedApplicationSecret = await insurancePool.encryptedApplicationSecret();
-        const checkingLogic = await insurancePool.checkingLogic();
-        const approvedValue = await insurancePool.approvedValue();
+        const regexValidation = await insurancePool.regexValidation();
 
         // Decryption results
-        const decryptedUrlToken = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedUrlToken, "hex"))).toString();
+        const decryptedCurlSecretKey = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedCurlSecretKey, "hex"))).toString();
         const decryptedApplicationID = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedApplicationID, "hex"))).toString();
         const decryptedApplicationSecret = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedApplicationSecret, "hex"))).toString();
+
+        const request = curlConverter.toJsonString(curl.replace("SECRET_KEY", decryptedCurlSecretKey));
+        const requestInJson = JSON.parse(request);
 
         let isApproved = false;
 
         try {
             const reclaimClient = new ReclaimClient(decryptedApplicationID, decryptedApplicationSecret);
 
-            const proof = await reclaimClient.zkFetch(url.replace("$TOKEN", decryptedUrlToken), {
+            const proof = await reclaimClient.zkFetch(requestInJson.url, {
                 method: 'GET',
+                headers: requestInJson.headers
             }, {
                 responseMatches: [
                     {
                         "type": "regex",
-                        "value": regex
+                        "value": regexExtraction
                     }
                 ],
             });
@@ -107,26 +114,12 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
 
                 const proofData = await Reclaim.transformForOnchain(proof);
 
-                switch (checkingLogic) {
-                    case "==":
-                        isApproved = proof.extractedParameterValues['value'] == approvedValue;
-                        break;
-                    case "!=":
-                        isApproved = proof.extractedParameterValues['value'] != approvedValue;
-                        break;
-                    case ">=":
-                        isApproved = proof.extractedParameterValues['value'] >= Number(approvedValue);
-                        break;
-                    case ">":
-                        isApproved = Number(String(proof.extractedParameterValues['value'])) > Number(approvedValue);
-                        break;
-                    case "<=":
-                        isApproved = proof.extractedParameterValues['value'] <= Number(approvedValue);
-                        break;
-                    case "<":
-                        isApproved = proof.extractedParameterValues['value'] < Number(approvedValue);
-                        break;
-                }
+                const regex = new RegExp(regexValidation);
+
+                console.log('proof data', proofData);
+                console.log('extracted value', proof.extractedParameterValues['extractedValue'])
+
+                isApproved = regex.test(proof.extractedParameterValues['extractedValue']);
             }
         } catch (e) {
             console.log(e);
@@ -227,7 +220,7 @@ const monitorNewClaims = async () => {
         try {
             console.log(`New claim detected: Insurance, ${claim.pool} ${claim.insured} ${claim.amount} ${claim.index}`);
             await signAndRespondToClaim(claimIndex, claim.claimCreatedBlock, claim.pool, claim.insured, claim.amount, claim.index);
-        } catch(e) {
+        } catch (e) {
             console.log('ERROR MONITORING', e)
         }
     });
