@@ -7,7 +7,7 @@ import { ethers } from "ethers";
 import fs from "fs";
 import path from "path";
 import {fileURLToPath} from 'url';
-import * as curlConverter from 'curlconverter'
+import curlConverter from "@proxymanllc/better-curl-to-json";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,7 +65,7 @@ const main = async () => {
         // const regexValidation = await insurancePool.regexValidation();
         // const approvedValue = await insurancePool.approvedValue();
 
-        const curl = "curl --location --globoff 'https://api.npoint.io/c9aa3e8003aceb1b9b52' --header 'content-type: application/json' --header 'x-api-key: SECRET_KEY'"
+        const curl = "curl -X GET 'https://api.npoint.io/c9aa3e8003aceb1b9b52' --header 'content-type: application/json' --header 'x-api-key: SECRET_KEY'"
         const encryptedCurlSecretKey = "04278d1a2ff5452c89e714699a77f81627a9a5875104c0809cf9e0f6dacf5a2c0dd840586a64cfa89b2d104107b5cfd8569f965e6f75cc4eac59955f28d7f1cc70570e667caf233e4eacbc8ebf952fa581e53dae7153515992c681d9df58acfb42";
         const regexExtraction = '\\{"data":\\{"rekts":\\[(?<extractedValue>.*?)\\]\\}\\}';
         const encryptedApplicationID = "04fab08cf72b5eac277e68f04b45e288d2ee68c4f1696e442e8c03ec7274c7d9da83c0dc614b840e518a4d4fd255a7ee8c9cdb04ceba84eea621ac41265c5a5ac80eacdfe3dd294d813774c1a1ccaedf95e967cbaf554b6c577555e4f64fbd265d4dbf5365c722956afe93d7ad66ca2a87090ddc38e504d6388e6a919b347d2655588e6a11231d2406ddce";
@@ -77,8 +77,7 @@ const main = async () => {
         const decryptedApplicationID = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedApplicationID, "hex"))).toString();
         const decryptedApplicationSecret = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedApplicationSecret, "hex"))).toString();
 
-        const result = curlConverter.toJsonString(curl.replace("SECRET_KEY", decryptedCurlSecretKey));
-        const resultInJson = JSON.parse(result);
+        const resultInJson = curlConverter(curl.replace("SECRET_KEY", decryptedCurlSecretKey));
 
         console.log(curl);
         console.log(resultInJson.url);
@@ -91,7 +90,7 @@ const main = async () => {
 
             const proof = await reclaimClient.zkFetch(resultInJson.url, {
                 method: 'GET',
-                headers: resultInJson.headers
+                headers: resultInJson.header
             }, {
                 responseMatches: [
                     {

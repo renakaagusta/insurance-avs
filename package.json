@@ -16,11 +16,14 @@
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest"
   },
   "dependencies": {
+    "@proxymanllc/better-curl-to-json": "^0.2.0",
     "curlconverter": "^4.11.0",
     "dotenv": "^10.0.0",
     "eciesjs": "^0.4.12",
     "ethereum-cryptography": "^1.1.2",
-    "ethers": "^6.13.2"
+    "ethers": "^6.13.2",
+    "i": "^0.3.7",
+    "npm": "^10.9.1"
   },
   "devDependencies": {
     "@reclaimprotocol/circom-symmetric-crypto": "^1.1.3",

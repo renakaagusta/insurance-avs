@@ -7,7 +7,7 @@ import { decrypt } from "eciesjs";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
-import * as curlConverter from 'curlconverter'
+import curlConverter from "@proxymanllc/better-curl-to-json";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -83,8 +83,7 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
         const decryptedApplicationID = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedApplicationID, "hex"))).toString();
         const decryptedApplicationSecret = Buffer.from(decrypt(privateKeyInBytes, Buffer.from(encryptedApplicationSecret, "hex"))).toString();
 
-        const request = curlConverter.toJsonString(curl.replace("SECRET_KEY", decryptedCurlSecretKey));
-        const requestInJson = JSON.parse(request);
+        const requestInJson = curlConverter(curl.replace("SECRET_KEY", decryptedCurlSecretKey));
 
         let isApproved = false;
 
@@ -93,7 +92,7 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
 
             const proof = await reclaimClient.zkFetch(requestInJson.url, {
                 method: 'GET',
-                headers: requestInJson.headers
+                headers: requestInJson.header
             }, {
                 responseMatches: [
                     {
