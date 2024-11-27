@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
 import curlConverter from "@proxymanllc/better-curl-to-json";
+import { PinataSDK } from "pinata-web3";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,6 +47,11 @@ const delegationManager = new ethers.Contract(delegationManagerAddress, delegati
 const insuranceServiceManager = new ethers.Contract(insuranceServiceManagerAddress, insuranceServiceManagerABI, wallet);
 const ecdsaRegistryContract = new ethers.Contract(ecdsaStakeRegistryAddress, ecdsaRegistryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
+
+const pinata = new PinataSDK({
+    pinataJwt: process.env.PINATA_JWT!,
+    pinataGateway: process.env.PINATA_GATEWAY,
+});
 
 const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: number, pool: string, insured: string, amount: number, index: number) => {
     try {
@@ -86,6 +92,7 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
         const requestInJson = curlConverter(curl.replace("SECRET_KEY", decryptedCurlSecretKey));
 
         let isApproved = false;
+        let uploadedProofUri = "";
 
         try {
             const reclaimClient = new ReclaimClient(decryptedApplicationID, decryptedApplicationSecret);
@@ -113,8 +120,14 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
 
                 const proofData = await Reclaim.transformForOnchain(proof);
 
+                const proofFile = new File([JSON.stringify(proof)], "proof.json", { type: "application/json" });
+                const uploadedProof = await pinata.upload.file(proofFile);            
+
+                uploadedProofUri = `https://${process.env.PINATA_GATEWAY}/ipfs/${uploadedProof.IpfsHash}`
+
                 const regex = new RegExp(regexValidation);
 
+                console.log('proof uri', uploadedProofUri)
                 console.log('proof data', proofData);
                 console.log('extracted value', proof.extractedParameterValues['extractedValue'])
 
@@ -134,7 +147,7 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
 
         if (isApproved) {
             const txApproveClaimSpending = await insuranceServiceManager.approveClaimSpending(
-                { pool: pool, insured: insured, amount: amount, index: index, isApproved: isApproved, claimCreatedBlock: claimCreatedBlock },
+                { pool: pool, insured: insured, amount: amount, index: index, isApproved: isApproved, proofUri: uploadedProofUri, claimCreatedBlock: claimCreatedBlock },
                 claimIndex,
                 signedClaim
             );
@@ -142,7 +155,7 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
         }
 
         const txRespondToClaim = await insuranceServiceManager.respondToClaim(
-            { pool: pool, insured: insured, amount: amount, index: index, isApproved: isApproved, claimCreatedBlock: claimCreatedBlock },
+            { pool: pool, insured: insured, amount: amount, index: index, isApproved: isApproved, proofUri: uploadedProofUri, claimCreatedBlock: claimCreatedBlock },
             claimIndex,
             signedClaim
         );

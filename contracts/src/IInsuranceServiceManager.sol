@@ -7,6 +7,7 @@ interface IInsuranceServiceManager {
         address insured;
         uint256 amount;
         uint256 index;
+        string proofUri;
         uint32 claimCreatedBlock;
         bool isApproved;
     }

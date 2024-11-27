@@ -18,6 +18,8 @@ import {
     IStrategy
 } from "@eigenlayer-middleware/src/interfaces/IECDSAStakeRegistryEventsAndErrors.sol";
 
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 contract TestConstants {
     uint256 constant NUM_PAYMENTS = 8;
     uint256 constant NUM_TOKEN_EARNINGS = 1;
@@ -33,6 +35,7 @@ contract SetupPaymentsLibTest is Test, TestConstants, InsuranceClaimManagerSetup
     using SetupPaymentsLib for *;
     Vm cheats = Vm(VM_ADDRESS);
 
+    address stakedUSDe;
 
     IRewardsCoordinator public rewardsCoordinator;
     IStrategy public strategy;
@@ -42,25 +45,22 @@ contract SetupPaymentsLibTest is Test, TestConstants, InsuranceClaimManagerSetup
 
     
     function setUp() public override virtual {
-        proxyAdmin = UpgradeableProxyLib.deployProxyAdmin();
-        operatorPublicKey = vm.envString("PUBLIC_KEY");
+        // proxyAdmin = UpgradeableProxyLib.deployProxyAdmin();
 
-        coreConfigData =
-           CoreDeploymentLib.readDeploymentConfigValues("test/mockData/config/core/", 1337); // TODO: Fix this to correct path
-        coreDeployment = CoreDeploymentLib.deployContracts(proxyAdmin, coreConfigData);
+        // coreConfigData =
+        //    CoreDeploymentLib.readDeploymentConfigValues("test/mockData/config/core/", 1337); // TODO: Fix this to correct path
+        // coreDeployment = CoreDeploymentLib.deployContracts(proxyAdmin, coreConfigData);
 
-        mockToken = new ERC20Mock();
+        // strategy = addStrategy(stakedUSDe); // Similar function to HW_SM test using strategy factory
+        // quorum.strategies.push(StrategyParams({strategy: strategy, multiplier: 10_000}));
 
-        strategy = addStrategy(address(mockToken)); // Similar function to HW_SM test using strategy factory
-        quorum.strategies.push(StrategyParams({strategy: strategy, multiplier: 10_000}));
+        // insuranceDeployment =
+        //     InsuranceDeploymentLib.deployContracts(proxyAdmin, coreDeployment, quorum);
+        // labelContracts(coreDeployment, insuranceDeployment);
 
-        insuranceDeployment =
-            InsuranceDeploymentLib.deployContracts(proxyAdmin, coreDeployment, quorum);
-        labelContracts(coreDeployment, insuranceDeployment);
-
-        rewardsCoordinator = IRewardsCoordinator(coreDeployment.rewardsCoordinator);
-        mockToken.mint(address(this), 100000);
-        mockToken.mint(address(rewardsCoordinator), 100000);
+        // rewardsCoordinator = IRewardsCoordinator(coreDeployment.rewardsCoordinator);
+        // stakedUSDe.mint(address(this), 100000);
+        // mockToken.mint(address(rewardsCoordinator), 100000);
     }
 
 

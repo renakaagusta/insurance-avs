@@ -10,6 +10,7 @@ interface IInsurancePool is IERC20 {
         address insured;
         uint256 amount;
         uint256 index;
+        string proofUri;
         bool isApproved;
     }
 

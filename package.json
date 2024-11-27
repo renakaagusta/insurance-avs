@@ -16,13 +16,15 @@
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest"
   },
   "dependencies": {
+    "@pinata/sdk": "^2.1.0",
     "@proxymanllc/better-curl-to-json": "^0.2.0",
     "dotenv": "^10.0.0",
     "eciesjs": "^0.4.12",
     "ethereum-cryptography": "^1.1.2",
     "ethers": "^6.13.2",
     "i": "^0.3.7",
-    "npm": "^10.9.1"
+    "npm": "^10.9.1",
+    "pinata-web3": "^0.5.2"
   },
   "devDependencies": {
     "@reclaimprotocol/circom-symmetric-crypto": "^1.1.3",

@@ -123,7 +123,7 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
         //     revert();
         // }
 
-        IInsurancePool.Claim memory submittedClaim = IInsurancePool.Claim(claim.insured, claim.amount, claim.index, claim.isApproved);
+        IInsurancePool.Claim memory submittedClaim = IInsurancePool.Claim(claim.insured, claim.amount, claim.index, claim.proofUri, claim.isApproved);
 
         IInsurancePool(claim.pool).approveClaimSpending(submittedClaim);
     }
@@ -156,7 +156,7 @@ contract InsuranceServiceManager is ECDSAServiceManagerBase, IInsuranceServiceMa
         allClaimResponses[msg.sender][referenceClaimIndex] = signature;
 
         // respond the result to pool
-        IInsurancePool.Claim memory submittedClaim = IInsurancePool.Claim(claim.insured, claim.amount, claim.index, claim.isApproved);
+        IInsurancePool.Claim memory submittedClaim = IInsurancePool.Claim(claim.insured, claim.amount, claim.index, claim.proofUri, claim.isApproved);
         IInsurancePool(claim.pool).respondToClaim(submittedClaim);
 
         // emitting event
