@@ -80,7 +80,7 @@ npm run extract:abis
 # Start the Operator application
 npm run start:operator
 
-npm run build && npm run deploy:core && npm run deploy:insurance && npm run extract:abis && npm run start:operator
+npm run build && npm run deploy:core && npm run deploy:insurance && npm run extract:abis
 
 ```
 
