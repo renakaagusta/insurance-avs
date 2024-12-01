@@ -138,12 +138,17 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
             isApproved = false;
         }
 
-        console.log('operator', await wallet.getAddress());
-        console.log('sevice manager', await insuranceServiceManager.getAddress());
+        console.log('index', index);
         console.log('pool', pool);
+        console.log('url', requestInJson.url);
+        console.log('headers', requestInJson.header);
+        console.log('application id', decryptedApplicationID);
+        console.log('application secret', decryptedApplicationSecret);
+        console.log('secret key', decryptedCurlSecretKey);
+        console.log('regex extraction', regexExtraction);
+        console.log('regex validation', regexValidation);
         console.log('insured', insured);
         console.log('amount', amount);
-        console.log('index', index)
 
         if (isApproved) {
             const txApproveClaimSpending = await insuranceServiceManager.approveClaimSpending(
