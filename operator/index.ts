@@ -72,7 +72,7 @@ const signAndRespondToClaim = async (claimIndex: number, claimCreatedBlock: numb
         const insurancePool = new ethers.Contract(pool, insurancePoolABI, wallet);
 
         // Private key and derived bytes
-        const privateKeyInHex = '0x45d37ea082249aa1349f24663fbcfdc325b4bce530527e929c4356fc925f4f47';
+        const privateKeyInHex = process.env.PRIVATE_KEY;
 
         const privateKeyInBytes = hexToBytes(privateKeyInHex);
 
